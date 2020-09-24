@@ -32,6 +32,9 @@ public class HttpUtil {
      * @return
      */
     public static InputStream request(RestApiCacheModel restApiCacheModel, Object[] params, ContentType contentType) throws Exception{
+        if(contentType == null){
+            throw new Exception("必须指定ContentType");
+        }
         if(restApiCacheModel.getReqMethod().equals(ReqMethod.GET) && !contentType.equals(ContentType.FORM)){
             throw new Exception("请求的接口，请求方式为GET，所以ContentType只能为FORM，接口名:" + restApiCacheModel.getUrl());
         }
