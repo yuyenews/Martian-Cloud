@@ -42,6 +42,11 @@ public class CloudConfig {
      */
     private String ip;
 
+    /**
+     * 是否作为一个网关
+     */
+    private boolean gateWay = false;
+
     public String getName() {
         return name;
     }
@@ -104,5 +109,13 @@ public class CloudConfig {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public boolean isGateWay() {
+        return gateWay;
+    }
+
+    public void setGateWay(boolean gateWay) {
+        this.gateWay = gateWay;
     }
 }
