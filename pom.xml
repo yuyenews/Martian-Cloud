@@ -7,7 +7,7 @@
     <groupId>com.github.yuyenews</groupId>
     <artifactId>Martian-Cloud</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.20</version>
+    <version>3.0.21</version>
     <modules>
         <module>mars-cloud-core</module>
         <module>mars-cloud-request</module>
@@ -24,17 +24,17 @@
             <dependency>
                 <groupId>com.github.yuyenews</groupId>
                 <artifactId>mars-cloud-common</artifactId>
-                <version>3.0.20</version>
+                <version>${version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.yuyenews</groupId>
                 <artifactId>mars-cloud-core</artifactId>
-                <version>3.0.20</version>
+                <version>${version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.yuyenews</groupId>
                 <artifactId>mars-cloud-request</artifactId>
-                <version>3.0.20</version>
+                <version>${version}</version>
             </dependency>
             <dependency>
                 <groupId>com.squareup.okhttp3</groupId>
