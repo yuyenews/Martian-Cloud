@@ -2,6 +2,7 @@ package com.mars.cloud.request.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.request.rest.model.RequestParamModel;
+import com.mars.cloud.request.util.enums.ValueType;
 import com.mars.common.util.StringUtil;
 import com.mars.server.server.request.model.MarsFileUpLoad;
 
@@ -27,19 +28,28 @@ public class ParamConversionUtil {
         }
         JSONObject jsonParam = new JSONObject();
         for(Object param : params){
-            Class cls = param.getClass();
-            Field[] fields = cls.getDeclaredFields();
-            for(Field field : fields){
-                field.setAccessible(true);
+            if(param instanceof Map){
+                /* 如果对象是个map就直接强转然后处理 */
+                Map map = (Map) param;
+                for(Object key : map.keySet()){
+                    jsonParam.put(key.toString(), map.get(key));
+                }
+            } else {
+                // 否则就用反射处理
+                Class cls = param.getClass();
+                Field[] fields = cls.getDeclaredFields();
+                for(Field field : fields){
+                    field.setAccessible(true);
 
-                if(Modifier.isFinal(field.getModifiers())){
-                    continue;
+                    if(Modifier.isFinal(field.getModifiers())){
+                        continue;
+                    }
+                    Object val = field.get(param);
+                    if(StringUtil.isNull(val)){
+                        continue;
+                    }
+                    jsonParam.put(field.getName(), val);
                 }
-                Object val = field.get(param);
-                if(StringUtil.isNull(val)){
-                    continue;
-                }
-                jsonParam.put(field.getName(), val);
             }
         }
         return jsonParam;
@@ -62,18 +72,36 @@ public class ParamConversionUtil {
             Field[] fields = cls.getDeclaredFields();
 
             for (Object par : params) {
-                for (Field field : fields) {
-                    field.setAccessible(true);
+                if(param instanceof Map){
+                    /* 如果对象是个map就直接强转然后处理 */
+                    Map map = (Map) param;
+                    for(Object key : map.keySet()){
+                        Object value = map.get(key);
+                        if(value == null){
+                            continue;
+                        }
 
-                    if(Modifier.isFinal(field.getModifiers())){
-                        continue;
+                        RequestParamModel requestParamModel = getRequestParamModel(key.toString(), value);
+                        if (requestParamModel == null) {
+                            continue;
+                        }
+                        requestParamModelList.put(key.toString(), requestParamModel);
                     }
+                } else {
+                    // 否则就用反射处理
+                    for (Field field : fields) {
+                        field.setAccessible(true);
 
-                    RequestParamModel requestParamModel = getRequestParamModel(par, field);
-                    if (requestParamModel == null) {
-                        continue;
+                        if (Modifier.isFinal(field.getModifiers())) {
+                            continue;
+                        }
+
+                        RequestParamModel requestParamModel = getRequestParamModel(par, field);
+                        if (requestParamModel == null) {
+                            continue;
+                        }
+                        requestParamModelList.put(field.getName(), requestParamModel);
                     }
-                    requestParamModelList.put(field.getName(), requestParamModel);
                 }
             }
         }
@@ -95,23 +123,39 @@ public class ParamConversionUtil {
         if(val == null){
             return null;
         }
+        return getRequestParamModel(field.getName(), val);
+    }
+
+    /**
+     * 将参数转成统一规格的对象
+     * @return
+     * @throws Exception
+     */
+    private static RequestParamModel getRequestParamModel(String name, Object value) throws Exception {
+        if(value == null){
+            return null;
+        }
+
+        ValueType valueType = ValueType.getValueType(value);
 
         RequestParamModel paramModel = new RequestParamModel();
 
-        if(field.getType().equals(MarsFileUpLoad.class)){
-            MarsFileUpLoad marsFileUpLoad = (MarsFileUpLoad)val;
-
-            paramModel.setMarsFileUpLoad(marsFileUpLoad);
-            paramModel.setFile(true);
-        } else if(field.getType().equals(MarsFileUpLoad[].class)) {
-            MarsFileUpLoad[] marsFileUpLoads = (MarsFileUpLoad[])val;
-
-            paramModel.setMarsFileUpLoads(marsFileUpLoads);
-            paramModel.setFile(true);
-        } else {
-            paramModel.setName(field.getName());
-            paramModel.setValue(val);
-            paramModel.setFile(false);
+        switch (valueType){
+            case FILE:
+                MarsFileUpLoad marsFileUpLoad = (MarsFileUpLoad)value;
+                paramModel.setMarsFileUpLoad(marsFileUpLoad);
+                paramModel.setFile(true);
+                return paramModel;
+            case FILES:
+                MarsFileUpLoad[] marsFileUpLoads = (MarsFileUpLoad[])value;
+                paramModel.setMarsFileUpLoads(marsFileUpLoads);
+                paramModel.setFile(true);
+                return paramModel;
+            case OTHER:
+                paramModel.setName(name);
+                paramModel.setValue(value);
+                paramModel.setFile(false);
+                return paramModel;
         }
         return paramModel;
     }

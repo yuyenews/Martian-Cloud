@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,7 +30,11 @@ public class ParamConversionUtilTest {
             TestParamModelA testParamModelA = new TestParamModelA();
             TestParamModelB testParamModelB = new TestParamModelB();
 
-            Object[] objects = new Object[]{testParamModelA, testParamModelB};
+            Map<String,Object> map = new HashMap<>();
+            map.put("kkkk","123");
+            map.put("bbbb","rty");
+
+            Object[] objects = new Object[]{testParamModelA, testParamModelB, map};
 
             JSONObject jsonObject = ParamConversionUtil.conversionToJson(objects);
 
@@ -64,7 +69,11 @@ public class ParamConversionUtilTest {
             TestParamModelA testParamModelA = new TestParamModelA();
             TestParamModelC testParamModelC = new TestParamModelC();
 
-            Object[] objects = new Object[]{testParamModelA, testParamModelC};
+            Map<String,Object> map = new HashMap<>();
+            map.put("kkkk",testParamModelC.getMarsFileUpLoads());
+            map.put("bbbb","rty");
+
+            Object[] objects = new Object[]{testParamModelA, testParamModelC, map};
 
             Map<String, RequestParamModel> requestParamModelMap = ParamConversionUtil.getRequestParamModelList(objects);
 
