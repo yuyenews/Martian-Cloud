@@ -2,8 +2,6 @@ package com.mars.cloud.config.model;
 
 import com.mars.cloud.config.model.enums.Protocol;
 import com.mars.cloud.config.model.enums.Strategy;
-import com.mars.cloud.fuse.FuseDefault;
-import com.mars.cloud.fuse.FuseManager;
 
 public class CloudConfig {
     /**
@@ -26,12 +24,6 @@ public class CloudConfig {
      * zookeeper地址，多个地址用英文逗号分割，并在外面加一个双引号
      */
     private String register;
-
-    /**
-     * 熔断器
-     */
-    private FuseManager fuseManager = new FuseDefault();
-
     /**
      * 请求协议
      */
@@ -85,14 +77,6 @@ public class CloudConfig {
 
     public void setRegister(String register) {
         this.register = register;
-    }
-
-    public FuseManager getFuseManager() {
-        return fuseManager;
-    }
-
-    public void setFuseManager(FuseManager fuseManager) {
-        this.fuseManager = fuseManager;
     }
 
     public Protocol getProtocol() {

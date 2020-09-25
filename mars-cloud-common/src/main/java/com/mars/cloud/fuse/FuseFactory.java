@@ -16,7 +16,7 @@ public class FuseFactory {
      */
     public static FuseManager getFuseManager() throws Exception {
         if(fuseManager == null){
-            fuseManager = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getFuseManager();
+            fuseManager = MarsCloudConfigUtil.getMarsCloudConfig().getFuseConfig().getFuseManager();
         }
         return fuseManager;
     }
