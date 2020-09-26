@@ -20,6 +20,6 @@ public abstract class MarsCloudConfig extends MarsConfig {
      * @return
      */
     public FuseConfig getFuseConfig(){
-        return null;
+        return new FuseConfig();
     }
 }
