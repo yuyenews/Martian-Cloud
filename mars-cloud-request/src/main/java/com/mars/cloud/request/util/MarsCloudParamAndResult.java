@@ -40,10 +40,11 @@ public class MarsCloudParamAndResult implements BaseParamAndResult {
      */
     @Override
     public void result(HttpMarsResponse response, Object resultObj) throws Exception {
-        byte[] bytes = new byte[0];
-        if(resultObj != null && !resultObj.toString().equals(MarsConstant.VOID)) {
-            bytes = SerializableUtil.serialization(resultObj);
+        if(resultObj == null || resultObj.toString().equals(MarsConstant.VOID)){
+            return;
         }
+
+        byte[] bytes = SerializableUtil.serialization(resultObj);
         response.downLoad("blank",converToInputStream(bytes));
     }
 
