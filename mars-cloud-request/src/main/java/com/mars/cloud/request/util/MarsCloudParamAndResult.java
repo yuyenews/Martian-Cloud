@@ -1,5 +1,6 @@
 package com.mars.cloud.request.util;
 
+import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.common.constant.MarsConstant;
 import com.mars.common.util.SerializableUtil;
 import com.mars.iserver.par.base.BaseParamAndResult;
@@ -45,7 +46,7 @@ public class MarsCloudParamAndResult implements BaseParamAndResult {
         }
 
         byte[] bytes = SerializableUtil.serialization(resultObj);
-        response.downLoad("blank",converToInputStream(bytes));
+        response.downLoad(MarsCloudConstant.RESULT_FILE_NAME,converToInputStream(bytes));
     }
 
     /**

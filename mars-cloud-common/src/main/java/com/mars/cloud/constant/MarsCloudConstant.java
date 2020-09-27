@@ -21,7 +21,8 @@ public class MarsCloudConstant {
     public static final String API_SERVER_NODE = SERVER_NODE + "/{ip}-{port}";
 
     /**
-     * 接受cloud传参的key
+     * 返回数据的名称
      */
-    public static final String PARAM = "marsCloudParam";
+    public static final String RESULT_FILE_NAME = "98eab41f-167f-440e-8122-841859e19df2.data";
+
 }
