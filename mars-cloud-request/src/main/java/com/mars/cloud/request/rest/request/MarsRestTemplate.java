@@ -8,8 +8,6 @@ import com.mars.cloud.request.util.HttpUtil;
 import com.mars.cloud.request.util.model.HttpResultModel;
 import com.mars.common.util.SerializableUtil;
 
-import java.io.InputStream;
-
 /**
  * 发起rest请求
  */
