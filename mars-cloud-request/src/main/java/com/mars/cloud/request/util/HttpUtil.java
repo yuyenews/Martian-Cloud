@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.annotation.enums.ContentType;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.request.rest.model.RequestParamModel;
+import com.mars.cloud.request.util.model.HttpResultModel;
 import com.mars.cloud.util.MarsCloudConfigUtil;
 import com.mars.common.annotation.enums.ReqMethod;
 import com.mars.common.constant.MarsConstant;
@@ -11,7 +12,6 @@ import com.mars.common.util.StringUtil;
 import com.mars.server.server.request.model.MarsFileUpLoad;
 import okhttp3.*;
 
-import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +31,7 @@ public class HttpUtil {
      * @param params
      * @return
      */
-    public static InputStream request(RestApiCacheModel restApiCacheModel, Object[] params, ContentType contentType) throws Exception{
+    public static HttpResultModel request(RestApiCacheModel restApiCacheModel, Object[] params, ContentType contentType) throws Exception{
         if(contentType == null){
             throw new Exception("必须指定ContentType");
         }
@@ -60,7 +60,7 @@ public class HttpUtil {
      * @return
      * @throws Exception
      */
-    private static InputStream formData(RestApiCacheModel restApiModel, Object[] params) throws Exception {
+    private static HttpResultModel formData(RestApiCacheModel restApiModel, Object[] params) throws Exception {
 
         OkHttpClient okHttpClient = getOkHttpClient();
 
@@ -112,7 +112,7 @@ public class HttpUtil {
      * @param params
      * @return
      */
-    private static InputStream formPost(RestApiCacheModel restApiModel, Object[] params) throws Exception {
+    private static HttpResultModel formPost(RestApiCacheModel restApiModel, Object[] params) throws Exception {
         OkHttpClient okHttpClient = getOkHttpClient();
 
         JSONObject jsonParam = ParamConversionUtil.conversionToJson(params);
@@ -151,7 +151,7 @@ public class HttpUtil {
      * @param params
      * @return
      */
-    private static InputStream formGet(RestApiCacheModel restApiModel, Object[] params) throws Exception {
+    private static HttpResultModel formGet(RestApiCacheModel restApiModel, Object[] params) throws Exception {
         OkHttpClient okHttpClient = getOkHttpClient();
 
         JSONObject jsonParam = ParamConversionUtil.conversionToJson(params);
@@ -213,7 +213,7 @@ public class HttpUtil {
      * @param params
      * @return
      */
-    private static InputStream json(RestApiCacheModel restApiModel, Object[] params) throws Exception {
+    private static HttpResultModel json(RestApiCacheModel restApiModel, Object[] params) throws Exception {
         String jsonStrParam = "{}";
         JSONObject jsonParam = ParamConversionUtil.conversionToJson(params);
         if (jsonParam != null) {
@@ -264,7 +264,7 @@ public class HttpUtil {
      * @return 结果
      * @throws Exception 异常
      */
-    private static InputStream okCall(OkHttpClient okHttpClient, Request request) throws Exception {
+    private static HttpResultModel okCall(OkHttpClient okHttpClient, Request request) throws Exception {
         Call call = okHttpClient.newCall(request);
         Response response = call.execute();
 
@@ -273,7 +273,13 @@ public class HttpUtil {
         if (code != 200) {
             throw new Exception("请求接口出现异常:" + responseBody.string());
         }
-        return responseBody.byteStream();
+        HttpResultModel httpResultModel = new HttpResultModel();
+        String head = response.header("Content-Disposition");
+
+        httpResultModel.setFileName(head);
+        httpResultModel.setInputStream(responseBody.byteStream());
+
+        return httpResultModel;
     }
 
     /**
