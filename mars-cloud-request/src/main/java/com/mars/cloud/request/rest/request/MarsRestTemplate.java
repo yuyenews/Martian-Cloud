@@ -6,7 +6,7 @@ import com.mars.cloud.fuse.FuseFactory;
 import com.mars.cloud.request.balanced.BalancedManager;
 import com.mars.cloud.request.util.HttpUtil;
 import com.mars.cloud.request.util.model.HttpResultModel;
-import com.mars.common.util.SerializableUtil;
+import com.mars.cloud.util.SerializableCloudUtil;
 
 /**
  * 发起rest请求
@@ -39,7 +39,7 @@ public class MarsRestTemplate {
         if(resultType.equals(HttpResultModel.class)){
             return (T)httpResultModel;
         } else {
-            return SerializableUtil.deSerialization(httpResultModel.getInputStream(), resultType);
+            return SerializableCloudUtil.deSerialization(httpResultModel.getInputStream(), resultType);
         }
     }
 
