@@ -42,16 +42,20 @@ public class SerializableCloudUtil {
      */
     public static <T> T deSerialization(InputStream inputStream,Class<T> cls) throws Exception {
         try {
+            if(inputStream == null){
+                return null;
+            }
+
             if (cls.equals(InputStream.class)) {
                 return (T) inputStream;
             }
 
             Object object = SerializableUtil.deSerialization(inputStream, Object.class);
-            if (!cls.equals(object.getClass())) {
+            if(cls.equals(Object.class) || cls.equals(object.getClass())){
+                return (T) object;
+            } else {
                 throw new Exception("无法将" + object.getClass().getName() + "类型转成" + cls.getName() + "类型，原数据：" + JSON.toJSONString(object));
             }
-
-            return (T) object;
         } catch (Exception e) {
             throw new Exception("将二进制流反序列化成参数，出现异常", e);
         }
