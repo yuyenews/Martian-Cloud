@@ -15,7 +15,7 @@ import com.mars.cloud.util.SerializableCloudUtil;
 public class MarsRestTemplate {
 
     /**
-     * 发起请求,无header
+     * 发起请求,无传参,无header
      *
      * @param serverName serverName
      * @param methodName methodName
@@ -23,11 +23,11 @@ public class MarsRestTemplate {
      * @throws Exception 异常
      */
     public static <T> T request(String serverName, String methodName, Class<T> resultType, ContentType contentType) throws Exception {
-        return request(serverName, methodName, resultType, contentType, null);
+        return doRequestResultModel(serverName, methodName, null, resultType, contentType, null);
     }
 
     /**
-     * 发起请求,有header
+     * 发起请求,无传参,有header
      *
      * @param serverName serverName
      * @param methodName methodName
@@ -35,11 +35,11 @@ public class MarsRestTemplate {
      * @throws Exception 异常
      */
     public static <T> T request(String serverName, String methodName, Class<T> resultType, ContentType contentType, MarsHeader marsHeader) throws Exception {
-        return request(serverName, methodName, null, resultType, contentType, marsHeader);
+        return doRequestResultModel(serverName, methodName, null, resultType, contentType, marsHeader);
     }
 
     /**
-     * 发起请求,无header
+     * 发起请求,有传参,无header
      *
      * @param serverName serverName
      * @param methodName methodName
@@ -48,11 +48,11 @@ public class MarsRestTemplate {
      * @throws Exception 异常
      */
     public static <T> T request(String serverName, String methodName, Object[] params, Class<T> resultType, ContentType contentType) throws Exception {
-        return request(serverName, methodName, params, resultType, contentType, null);
+        return doRequestResultModel(serverName, methodName, params, resultType, contentType, null);
     }
 
     /**
-     * 发起请求,有header
+     * 发起请求,有传参,有header
      *
      * @param serverName serverName
      * @param methodName methodName
@@ -61,6 +61,19 @@ public class MarsRestTemplate {
      * @throws Exception 异常
      */
     public static <T> T request(String serverName, String methodName, Object[] params, Class<T> resultType, ContentType contentType, MarsHeader marsHeader) throws Exception {
+        return doRequestResultModel(serverName, methodName, params, resultType, contentType, marsHeader);
+    }
+
+    /**
+     * 发起请求,返回对象
+     *
+     * @param serverName serverName
+     * @param methodName methodName
+     * @param params     params
+     * @return 结果
+     * @throws Exception 异常
+     */
+    public static <T> T doRequestResultModel(String serverName, String methodName, Object[] params, Class<T> resultType, ContentType contentType, MarsHeader marsHeader) throws Exception {
         HttpResultModel httpResultModel = doRequest(serverName, methodName, params, contentType, marsHeader);
         if (resultType.equals(HttpResultModel.class)) {
             return (T) httpResultModel;
@@ -68,7 +81,6 @@ public class MarsRestTemplate {
             return SerializableCloudUtil.deSerialization(httpResultModel.getInputStream(), resultType);
         }
     }
-
 
     /**
      * 发起请求
@@ -93,18 +105,19 @@ public class MarsRestTemplate {
             boolean isFuse = FuseFactory.getFuseManager().isFuse(serverName, methodName, restApiCacheModel.getUrl());
             if (isFuse) {
                 HttpResultModel httpResultModel = HttpUtil.request(restApiCacheModel, params, contentType, marsHeader);
-                /* 由于要连续请求失败到一定次数，才会熔断，所以请求成功就清除错误次数 */
-                FuseFactory.getFuseManager().clearFailNum(serverName, methodName, restApiCacheModel.getUrl());
+
+                /* 请求成功后的熔断器业务逻辑 */
+                FuseFactory.getFuseManager().requestSuccess(serverName, methodName, restApiCacheModel.getUrl());
 
                 return httpResultModel;
             } else {
-                /* 如果熔断了就拒绝请求，并记录拒绝次数，让熔断器来判断是否进入半熔断状态 */
-                FuseFactory.getFuseManager().addFuseNum(serverName, methodName, restApiCacheModel.getUrl());
+                /* 接口熔断后，如果来请求了，熔断器的业务逻辑 */
+                FuseFactory.getFuseManager().fuseAfter(serverName, methodName, restApiCacheModel.getUrl());
                 throw new Exception("此接口已被熔断，一段时间后将会重新开放");
             }
         } catch (Exception e) {
-            /* 如果请求失败，就记录次数，用来给熔断器判断 是否进入熔断状态 */
-            FuseFactory.getFuseManager().addFailNum(serverName, methodName, restApiCacheModel.getUrl());
+            /* 请求失败后，熔断器的业务逻辑 */
+            FuseFactory.getFuseManager().requestFail(serverName, methodName, restApiCacheModel.getUrl());
             throw new Exception("发起请求出现异常,url:[" + restApiCacheModel.getUrl() + "],", e);
         }
     }

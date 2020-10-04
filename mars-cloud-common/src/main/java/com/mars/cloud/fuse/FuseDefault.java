@@ -12,17 +12,17 @@ public class FuseDefault implements FuseManager {
     }
 
     @Override
-    public void addFailNum(String serverName, String methodName, String url) throws Exception {
+    public void requestSuccess(String serverName, String methodName, String url) throws Exception {
 
     }
 
     @Override
-    public void addFuseNum(String serverName, String methodName, String url) throws Exception {
+    public void requestFail(String serverName, String methodName, String url) throws Exception {
 
     }
 
     @Override
-    public void clearFailNum(String serverName, String methodName, String url) throws Exception {
+    public void fuseAfter(String serverName, String methodName, String url) throws Exception {
 
     }
 }

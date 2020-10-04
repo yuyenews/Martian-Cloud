@@ -13,29 +13,30 @@ public interface FuseManager {
     boolean isFuse(String serverName, String methodName, String url) throws Exception;
 
     /**
-     * 添加错误次数，只要成功一次就从0开始计算
+     * 请求成功
      * @param serverName
      * @param methodName
      * @param url
      * @throws Exception
      */
-    void addFailNum(String serverName, String methodName, String url) throws Exception;
+    void requestSuccess(String serverName, String methodName, String url) throws Exception;
 
     /**
-     * 添加熔断后的请求次数
+     * 请求失败
      * @param serverName
      * @param methodName
      * @param url
      * @throws Exception
      */
-    void addFuseNum(String serverName, String methodName, String url) throws Exception;
+    void requestFail(String serverName, String methodName, String url) throws Exception;
 
     /**
-     * 清空请求失败次数
+     * 接口熔断后
      * @param serverName
      * @param methodName
      * @param url
      * @throws Exception
      */
-    void clearFailNum(String serverName, String methodName, String url) throws Exception;
+    void fuseAfter(String serverName, String methodName, String url) throws Exception;
+    
 }
