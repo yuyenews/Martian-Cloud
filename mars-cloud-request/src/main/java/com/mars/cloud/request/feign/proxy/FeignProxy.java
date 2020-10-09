@@ -70,7 +70,7 @@ public class FeignProxy implements MethodInterceptor {
         Class[] paramTypes = method.getParameterTypes();
         for(Class cls : paramTypes){
             if(cls.equals(HttpMarsRequest.class) || cls.equals(HttpMarsResponse.class)){
-                throw new Exception("MarsCloud接口，只可以用自定义对象作为参数，不可以用内置对象:["+cls.getName()+"."+method.getName()+"]");
+                throw new Exception("MarsCloud接口，不可以传递内置对象:["+cls.getName()+"."+method.getName()+"]");
             }
         }
     }
