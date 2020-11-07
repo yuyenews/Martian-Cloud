@@ -4,9 +4,9 @@ import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.request.balanced.BalancedCalc;
 import com.mars.server.server.request.HttpMarsContext;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 轮询算法
@@ -38,13 +38,13 @@ public class BalancedCalcPolling implements BalancedCalc {
      *
      * @return 下标
      */
-    private synchronized int getPollingIndex(String key, int size) {
-        Map<String, Integer> pollingMap = getPollingMap();
+    private int getPollingIndex(String key, int size) {
+        Map<String, AtomicInteger> pollingMap = getPollingMap();
 
-        int nowIndex = getNowIndex(key);
+        AtomicInteger nowIndex = getNowIndex(pollingMap, key);
 
-        if(nowIndex >= (size - 1)){
-            nowIndex = 0;
+        if(nowIndex.get() >= (size - 1)){
+            nowIndex.set(0);
             /*
              * 在项目的运行中，有些服务会被下掉，有些服务会减少或者修改接口
              * 这种变动可能会给这个缓存中造成垃圾数据，所以每经过一轮就清除一下
@@ -52,10 +52,10 @@ public class BalancedCalcPolling implements BalancedCalc {
              */
             pollingMap.remove(key);
         } else {
-            nowIndex++;
+            nowIndex.getAndIncrement();
         }
         pollingMap.put(key,nowIndex);
-        return nowIndex;
+        return nowIndex.get();
     }
 
     /**
@@ -63,21 +63,25 @@ public class BalancedCalcPolling implements BalancedCalc {
      * @param key 路径
      * @return
      */
-    private int getNowIndex(String key){
-        Integer nowIndexCache = getPollingMap().get(key);
-        if(nowIndexCache != null){
-            return nowIndexCache;
+    private synchronized AtomicInteger getNowIndex(Map<String, AtomicInteger> pollingMap, String key){
+        AtomicInteger nowIndexCache = pollingMap.get(key);
+        if(nowIndexCache == null){
+            return new AtomicInteger();
         }
-        return 0;
+        return nowIndexCache;
     }
 
-    private Map<String, Integer> getPollingMap(){
-        Map<String, Integer> pollingMap = new ConcurrentHashMap<>();
+    /**
+     * 获取轮询Map
+     * @return
+     */
+    private Map<String, AtomicInteger> getPollingMap(){
+        Map<String, AtomicInteger> pollingMap = new ConcurrentHashMap<>();
         Object obj = httpMarsContext.getAttr(POLLING_MAP);
         if(obj == null){
             httpMarsContext.setAttr(POLLING_MAP, pollingMap);
         } else {
-            pollingMap = (Map<String, Integer>)obj;
+            pollingMap = (Map<String, AtomicInteger>)obj;
         }
         return pollingMap;
     }
