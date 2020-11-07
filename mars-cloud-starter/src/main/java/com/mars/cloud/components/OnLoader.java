@@ -15,7 +15,7 @@ import com.mars.iserver.par.factory.ParamAndResultFactory;
 public class OnLoader implements BaseOnLoad {
 
     /**
-     * 加载feign
+     * 加载feign对象
      * @throws Exception
      */
     @Override
