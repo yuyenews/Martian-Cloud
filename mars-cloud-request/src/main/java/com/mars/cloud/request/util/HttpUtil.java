@@ -2,11 +2,12 @@ package com.mars.cloud.request.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.annotation.enums.ContentType;
+import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
+import com.mars.cloud.model.HttpResultModel;
 import com.mars.cloud.request.rest.model.RequestParamModel;
 import com.mars.cloud.request.util.model.MarsHeader;
-import com.mars.cloud.request.util.model.HttpResultModel;
-import com.mars.cloud.util.MarsCloudConfigUtil;
+import com.mars.cloud.util.HttpCommons;
 import com.mars.common.annotation.enums.ReqMethod;
 import com.mars.common.constant.MarsConstant;
 import com.mars.common.util.StringUtil;
@@ -16,16 +17,11 @@ import okhttp3.*;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * HTTP请求工具类
  */
 public class HttpUtil {
-
-    private static final String CONTENT_TYPE_JSON = "application/json;charset=UTF-8";
-
-    private static final String FORM_DATA = "multipart/form-data";
 
     private static final String CONTENT_TYPE_STR = "Content-type".toUpperCase();
 
@@ -68,10 +64,10 @@ public class HttpUtil {
      */
     private static HttpResultModel formData(RestApiCacheModel restApiModel, Object[] params, MarsHeader marsHeader) throws Exception {
 
-        OkHttpClient okHttpClient = getOkHttpClient();
+        OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
 
         /* 发起post请求 将数据传递过去 */
-        MediaType formData = MediaType.parse(FORM_DATA);
+        MediaType formData = MediaType.parse(MarsCloudConstant.FORM_DATA);
 
         MultipartBody.Builder builder = new MultipartBody.Builder();
         builder.setType(formData);
@@ -109,7 +105,7 @@ public class HttpUtil {
                 .url(restApiModel.getUrl())
                 .build();
 
-        return okCall(okHttpClient, request);
+        return HttpCommons.okCall(okHttpClient, request);
     }
 
     /**
@@ -120,7 +116,7 @@ public class HttpUtil {
      * @return
      */
     private static HttpResultModel formPost(RestApiCacheModel restApiModel, Object[] params, MarsHeader marsHeader) throws Exception {
-        OkHttpClient okHttpClient = getOkHttpClient();
+        OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
 
         JSONObject jsonParam = ParamConversionUtil.conversionToJson(params);
 
@@ -149,7 +145,7 @@ public class HttpUtil {
                 .url(restApiModel.getUrl())
                 .build();
 
-        return okCall(okHttpClient, request);
+        return HttpCommons.okCall(okHttpClient, request);
     }
 
     /**
@@ -160,7 +156,7 @@ public class HttpUtil {
      * @return
      */
     private static HttpResultModel formGet(RestApiCacheModel restApiModel, Object[] params, MarsHeader marsHeader) throws Exception {
-        OkHttpClient okHttpClient = getOkHttpClient();
+        OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
 
         JSONObject jsonParam = ParamConversionUtil.conversionToJson(params);
 
@@ -210,7 +206,7 @@ public class HttpUtil {
                 .url(restApiModel.getUrl() + paramStr.toString())
                 .build();
 
-        return okCall(okHttpClient, request);
+        return HttpCommons.okCall(okHttpClient, request);
     }
 
     /**
@@ -227,16 +223,16 @@ public class HttpUtil {
             jsonStrParam = jsonParam.toJSONString();
         }
 
-        OkHttpClient okHttpClient = getOkHttpClient();
+        OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
 
-        MediaType mediaType = MediaType.parse(CONTENT_TYPE_JSON);
+        MediaType mediaType = MediaType.parse(MarsCloudConstant.CONTENT_TYPE_JSON);
 
         RequestBody requestbody = RequestBody.create(jsonStrParam, mediaType);
         Request request = getRequestBuilder(restApiModel, requestbody, marsHeader)
                 .url(restApiModel.getUrl())
                 .build();
 
-        return okCall(okHttpClient, request);
+        return HttpCommons.okCall(okHttpClient, request);
     }
 
     /**
@@ -288,59 +284,5 @@ public class HttpUtil {
             }
         }
         return builder;
-    }
-
-    /**
-     * 开始请求
-     *
-     * @param okHttpClient 客户端
-     * @param request      请求
-     * @return 结果
-     * @throws Exception 异常
-     */
-    private static HttpResultModel okCall(OkHttpClient okHttpClient, Request request) throws Exception {
-        Call call = okHttpClient.newCall(request);
-        Response response = call.execute();
-
-        int code = response.code();
-        ResponseBody responseBody = response.body();
-        if (code != 200) {
-            throw new Exception("请求接口出现异常:" + responseBody.string());
-        }
-        HttpResultModel httpResultModel = new HttpResultModel();
-        String head = response.header("Content-Disposition");
-
-        httpResultModel.setFileName(head);
-        httpResultModel.setInputStream(responseBody.byteStream());
-
-        return httpResultModel;
-    }
-
-    /**
-     * 获取okHttp客户端
-     *
-     * @return 客户端
-     * @throws Exception 异常
-     */
-    private static OkHttpClient getOkHttpClient() throws Exception {
-        long timeOut = getTimeOut();
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(timeOut, TimeUnit.SECONDS)//设置连接超时时间
-                .readTimeout(timeOut, TimeUnit.SECONDS)//设置读取超时时间
-                .build();
-        return okHttpClient;
-    }
-
-    /**
-     * 从配置中获取超时时间
-     *
-     * @return
-     */
-    private static long getTimeOut() {
-        try {
-            return MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getTimeOut();
-        } catch (Exception e) {
-            return 100L;
-        }
     }
 }

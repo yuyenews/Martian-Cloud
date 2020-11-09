@@ -21,9 +21,9 @@ public class CloudConfig {
      */
     private Strategy strategy = Strategy.POLLING;
     /**
-     * zookeeper地址，多个地址用英文逗号分割，并在外面加一个双引号
+     * 传染渠道，多个地址用英文逗号分割，并在外面加一个双引号
      */
-    private String register;
+    private String contagions;
     /**
      * 请求协议
      */
@@ -71,12 +71,12 @@ public class CloudConfig {
         this.strategy = strategy;
     }
 
-    public String getRegister() {
-        return register;
+    public String getContagions() {
+        return contagions;
     }
 
-    public void setRegister(String register) {
-        this.register = register;
+    public void setContagions(String contagions) {
+        this.contagions = contagions;
     }
 
     public Protocol getProtocol() {

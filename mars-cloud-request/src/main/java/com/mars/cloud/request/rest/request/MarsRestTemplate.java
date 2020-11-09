@@ -3,9 +3,9 @@ package com.mars.cloud.request.rest.request;
 import com.mars.cloud.annotation.enums.ContentType;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.fuse.FuseFactory;
+import com.mars.cloud.model.HttpResultModel;
 import com.mars.cloud.request.balanced.BalancedManager;
 import com.mars.cloud.request.util.HttpUtil;
-import com.mars.cloud.request.util.model.HttpResultModel;
 import com.mars.cloud.request.util.model.MarsHeader;
 import com.mars.cloud.util.SerializableCloudUtil;
 

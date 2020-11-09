@@ -1,4 +1,4 @@
-package com.mars.cloud.request.util.model;
+package com.mars.cloud.model;
 
 import java.io.InputStream;
 

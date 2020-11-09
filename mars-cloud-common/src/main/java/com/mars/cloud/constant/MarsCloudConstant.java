@@ -6,19 +6,24 @@ package com.mars.cloud.constant;
 public class MarsCloudConstant {
 
     /**
-     * 存储api接口的根目录
+     * 获取接口
      */
-    public static final String BASE_SERVER_NODE = "/mars-cloud";
+    public static final String GET_APIS = "getApis";
 
     /**
-     * 存储api接口的serverName目录
+     * 添加接口
      */
-    public static final String SERVER_NODE = BASE_SERVER_NODE + "/{serverName}->{method}";
+    public static final String ADD_APIS  = "addApis";
 
     /**
-     * 存储api接口的节点
+     * JSON提交的请求头
      */
-    public static final String API_SERVER_NODE = SERVER_NODE + "/{ip}-{port}";
+    public static final String CONTENT_TYPE_JSON = "application/json;charset=UTF-8";
+
+    /**
+     * FORM_DATA提交的请求头
+     */
+    public static final String FORM_DATA = "multipart/form-data";
 
     /**
      * 返回数据的名称

@@ -1,6 +1,6 @@
 package com.mars.cloud.components;
 
-import com.mars.cloud.core.register.Registered;
+import com.mars.cloud.core.notice.MartianNotice;
 import com.mars.cloud.request.feign.load.LoadMarsFeign;
 import com.mars.cloud.request.util.MarsCloudParamAndResult;
 import com.mars.cloud.util.MarsCloudConfigUtil;
@@ -43,7 +43,7 @@ public class OnLoader implements BaseOnLoad {
         ParamAndResultFactory.setBaseParamAndResult(new MarsCloudParamAndResult());
 
         /* 注册服务 */
-        Registered registered = new Registered();
-        registered.doRegister();
+        MartianNotice martianNotice = new MartianNotice();
+        martianNotice.notice();
     }
 }

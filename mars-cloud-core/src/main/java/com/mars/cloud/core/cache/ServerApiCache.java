@@ -32,8 +32,16 @@ public class ServerApiCache {
      * @param restApiCacheModel
      */
     public void addCache(String serverName, String methodName, RestApiCacheModel restApiCacheModel){
-        Map<String, List<RestApiCacheModel>> restApiModelMap = getRestApiModelsByKey();
         String key = getKey(serverName,methodName);
+        addCache(key, restApiCacheModel);
+    }
+
+    /**
+     * 添加服务缓存
+     * @param restApiCacheModel
+     */
+    public void addCache(String key, RestApiCacheModel restApiCacheModel){
+        Map<String, List<RestApiCacheModel>> restApiModelMap = getRestApiModelsByKey();
 
         List<RestApiCacheModel> restApiCacheModelList = restApiModelMap.get(key);
         if(restApiCacheModelList == null){

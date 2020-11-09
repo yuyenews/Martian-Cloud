@@ -11,8 +11,6 @@ public class ServerApiCacheManager {
 
     private static ServerApiCache serverApiCache = new ServerApiCache();
 
-    private static LoadServerCache loadServerCache = new LoadServerCache();
-
     /**
      * 获取
      * @param serverName
@@ -21,22 +19,6 @@ public class ServerApiCacheManager {
      */
     public static List<RestApiCacheModel> getRestApiModelForCache(String serverName, String methodName) throws Exception {
         List<RestApiCacheModel> restApiCacheModelList = serverApiCache.getRestApiCacheModelList(serverName,methodName);
-
-        /* 如果缓存中有数据，则直接返回 */
-        if(restApiCacheModelList != null && restApiCacheModelList.size() > 0){
-            return restApiCacheModelList;
-        }
-
-        /* 如果缓存中没有获取到接口，就去zk里面获取 */
-        restApiCacheModelList = loadServerCache.getRestApiCacheModelByServerName(serverName, methodName);
-        if(restApiCacheModelList == null || restApiCacheModelList.size() < 1){
-            throw new Exception("没有找到服务接口, serverName:" + serverName + ", methodName:" + methodName);
-        }
-
-        for(RestApiCacheModel item : restApiCacheModelList){
-            serverApiCache.addCache(serverName, methodName, item);
-        }
-
         return restApiCacheModelList;
     }
 }
