@@ -7,7 +7,7 @@
     <groupId>com.github.yuyenews</groupId>
     <artifactId>Martian-Cloud</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.31</version>
+    <version>4.0</version>
     <modules>
         <module>mars-cloud-core</module>
         <module>mars-cloud-request</module>
