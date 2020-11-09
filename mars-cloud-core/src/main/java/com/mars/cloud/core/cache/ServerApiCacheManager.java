@@ -5,7 +5,7 @@ import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import java.util.List;
 
 /**
- * 服务的本地缓存，从naco获取接口列表保存到本地
+ * 本地缓存管理
  */
 public class ServerApiCacheManager {
 
@@ -17,7 +17,7 @@ public class ServerApiCacheManager {
      * @param methodName
      * @return
      */
-    public static List<RestApiCacheModel> getRestApiModelForCache(String serverName, String methodName) throws Exception {
+    public static List<RestApiCacheModel> getRestApiModelForCache(String serverName, String methodName) {
         List<RestApiCacheModel> restApiCacheModelList = serverApiCache.getRestApiCacheModelList(serverName,methodName);
         return restApiCacheModelList;
     }
