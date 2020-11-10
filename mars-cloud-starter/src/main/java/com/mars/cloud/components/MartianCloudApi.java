@@ -40,7 +40,7 @@ public class MartianCloudApi {
             return "ok";
         }
 
-        logger.info("受到了来自{}服务的接口传染,感染接口数量:{}", restApiModel.getServerName(), restApiModel.getRestApiCacheModels().size());
+        logger.info("受到了来自[{}]服务的接口传染,感染接口数量:[{}]", restApiModel.getServerName(), restApiModel.getRestApiCacheModels().size());
         ServerApiCacheManager.addCacheApi(restApiModel, true);
         return "ok";
     }
