@@ -7,6 +7,7 @@ import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.cloud.model.HttpResultModel;
 import com.mars.cloud.util.HttpCommons;
+import com.mars.cloud.util.RandomUtil;
 import com.mars.cloud.util.SerializableCloudUtil;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -77,4 +78,25 @@ public class NoticeUtil {
             return false;
         }
     }
+
+    /**
+     * 获取随机URL
+     * @param urlList
+     * @return
+     */
+    public static String getRandomUrl(List<String> urlList){
+        int index = RandomUtil.getIndex(urlList.size());
+        return urlList.get(index);
+    }
+
+    /**
+     * 获取随机URL
+     * @param urlArray
+     * @return
+     */
+    public static String getRandomUrl(String[] urlArray){
+        int index = RandomUtil.getIndex(urlArray.length);
+        return urlArray[index];
+    }
+
 }

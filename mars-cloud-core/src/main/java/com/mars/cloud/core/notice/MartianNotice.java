@@ -105,25 +105,30 @@ public class MartianNotice {
      */
     private void getApis(String[] contagionList) throws Exception {
         List<String> cacheServerList = ServerApiCacheManager.getAllServerList(true);
-
-        /* 优先从自己缓存的服务上获取接口 */
-        for(String url : cacheServerList){
-            String getApisUrl = url + "/" + MarsCloudConstant.GET_APIS;
-            boolean isSuccess = getRemoteApis(getApisUrl);
-            if(isSuccess){
-                /* 从任意服务器上拉取成功，就停止 */
-                return;
+        if (cacheServerList != null && cacheServerList.size() > 0) {
+            /* 优先从自己缓存的服务上获取接口 */
+            String url = NoticeUtil.getRandomUrl(cacheServerList);
+            for (int i = 0; i < cacheServerList.size(); i++) {
+                String getApisUrl = url + "/" + MarsCloudConstant.GET_APIS;
+                boolean isSuccess = getRemoteApis(getApisUrl);
+                if (isSuccess) {
+                    /* 从任意服务器上拉取成功，就停止 */
+                    return;
+                }
+                url = NoticeUtil.getRandomUrl(cacheServerList);
             }
         }
 
         /* 如果从自己缓存的服务上没有获取到接口，则从配置的服务商拉取 */
-        for(String contagion : contagionList){
+        String contagion = NoticeUtil.getRandomUrl(contagionList);
+        for (int i = 0; i < contagionList.length; i++) {
             String getApisUrl = contagion + "/" + MarsCloudConstant.GET_APIS;
             boolean isSuccess = getRemoteApis(getApisUrl);
-            if(isSuccess){
+            if (isSuccess) {
                 /* 从任意服务器上拉取成功，就停止 */
                 return;
             }
+            contagion = NoticeUtil.getRandomUrl(contagionList);
         }
     }
 
@@ -142,7 +147,7 @@ public class MartianNotice {
             for(Map.Entry<String, List<RestApiCacheModel>> entry : remoteCacheModelMap.entrySet()){
                 List<RestApiCacheModel> restApiCacheModels = entry.getValue();
                 if(restApiCacheModels == null || restApiCacheModels.size() < 1){
-                    return false;
+                    continue;
                 }
                 for(RestApiCacheModel restApiCacheModel : restApiCacheModels){
                     serverApiCache.addCache(entry.getKey(), restApiCacheModel, false);
