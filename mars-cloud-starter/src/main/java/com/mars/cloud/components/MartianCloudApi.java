@@ -1,11 +1,13 @@
 package com.mars.cloud.components;
 
-import com.mars.cloud.core.cache.ServerApiCache;
+import com.mars.cloud.core.cache.ServerApiCacheManager;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
-import com.mars.cloud.core.notice.model.RestApiVO;
+import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.common.annotation.api.MarsApi;
 import com.mars.common.annotation.api.RequestMethod;
 import com.mars.common.annotation.enums.ReqMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -16,27 +18,30 @@ import java.util.Map;
 @MarsApi
 public class MartianCloudApi {
 
-    private ServerApiCache serverApiCache = new ServerApiCache();
+    private Logger logger = LoggerFactory.getLogger(MartianCloudApi.class);
 
     /**
      * 将本服务存储的接口给其他服务
      * @return
      */
-    @RequestMethod(ReqMethod.POST)
     public Map<String, List<RestApiCacheModel>> getApis(){
-        return serverApiCache.getRestApiModelsByKey();
+        logger.info("被拉取了接口");
+        return ServerApiCacheManager.getCacheApisMap();
     }
 
     /**
      * 接口其他服务发送过来的通知
-     * @param restApiVO
+     * @param restApiModel
      * @return
      */
     @RequestMethod(ReqMethod.POST)
-    public String addApis(RestApiVO restApiVO){
-        for(RestApiCacheModel restApiCacheModel : restApiVO.getRestApiCacheModels()){
-            serverApiCache.addCache(restApiVO.getServerName(), restApiCacheModel.getMethodName(), restApiCacheModel);
+    public String addApis(RestApiModel restApiModel){
+        if(restApiModel == null || restApiModel.getRestApiCacheModels() == null){
+            return "ok";
         }
+
+        logger.info("受到了来自{}服务的接口传染,感染接口数量:{}", restApiModel.getServerName(), restApiModel.getRestApiCacheModels().size());
+        ServerApiCacheManager.addCacheApi(restApiModel, true);
         return "ok";
     }
 }

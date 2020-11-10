@@ -4,10 +4,14 @@ import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.common.constant.MarsSpace;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 接口缓存
+ */
 public class ServerApiCache {
 
     private MarsSpace marsContext = MarsSpace.getEasySpace();
@@ -31,37 +35,34 @@ public class ServerApiCache {
      * @param methodName
      * @param restApiCacheModel
      */
-    public void addCache(String serverName, String methodName, RestApiCacheModel restApiCacheModel){
+    public void addCache(String serverName, String methodName, RestApiCacheModel restApiCacheModel, boolean updateTime){
         String key = getKey(serverName,methodName);
-        addCache(key, restApiCacheModel);
+        addCache(key, restApiCacheModel, updateTime);
     }
 
     /**
      * 添加服务缓存
      * @param restApiCacheModel
      */
-    public void addCache(String key, RestApiCacheModel restApiCacheModel){
+    public synchronized void addCache(String key, RestApiCacheModel restApiCacheModel, boolean updateTime){
         Map<String, List<RestApiCacheModel>> restApiModelMap = getRestApiModelsByKey();
 
         List<RestApiCacheModel> restApiCacheModelList = restApiModelMap.get(key);
         if(restApiCacheModelList == null){
             restApiCacheModelList = new ArrayList<>();
         }
-        if(contains(restApiCacheModelList, restApiCacheModel)){
-            restApiCacheModelList.add(restApiCacheModel);
-
-            restApiModelMap.put(key, restApiCacheModelList);
-            marsContext.setAttr(REST_API_KEY, restApiModelMap);
+        RestApiCacheModel item = contains(restApiCacheModelList, restApiCacheModel);
+        if(item != null){
+            restApiCacheModelList.remove(item);
         }
-    }
+        if(updateTime){
+            restApiCacheModel.setCreateTime(new Date());
+        }
+        restApiCacheModelList.add(restApiCacheModel);
 
-    /**
-     * 替换所有的本地服务缓存
-     * @param restApiModelMap
-     */
-    public void saveCache(Map<String, List<RestApiCacheModel>> restApiModelMap){
-        marsContext.remove(REST_API_KEY);
+        restApiModelMap.put(key, restApiCacheModelList);
         marsContext.setAttr(REST_API_KEY, restApiModelMap);
+
     }
 
     /**
@@ -93,15 +94,15 @@ public class ServerApiCache {
      * @param restApiCacheModel
      * @return
      */
-    private boolean contains(List<RestApiCacheModel> restApiCacheModelList, RestApiCacheModel restApiCacheModel){
+    private RestApiCacheModel contains(List<RestApiCacheModel> restApiCacheModelList, RestApiCacheModel restApiCacheModel){
         if(restApiCacheModelList == null || restApiCacheModelList.size() < 1){
-            return true;
+            return null;
         }
         for(RestApiCacheModel item : restApiCacheModelList){
             if(item.getUrl().equals(restApiCacheModel.getUrl()) && item.getMethodName().equals(restApiCacheModel.getMethodName())){
-                return false;
+                return item;
             }
         }
-        return true;
+        return null;
     }
 }

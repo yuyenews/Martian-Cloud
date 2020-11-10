@@ -66,7 +66,7 @@ public class BalancedCalcPolling implements BalancedCalc {
     private synchronized AtomicInteger getNowIndex(Map<String, AtomicInteger> pollingMap, String key){
         AtomicInteger nowIndexCache = pollingMap.get(key);
         if(nowIndexCache == null){
-            return new AtomicInteger();
+            return new AtomicInteger(0);
         }
         return nowIndexCache;
     }

@@ -9,10 +9,6 @@ public class CloudConfig {
      */
     private String name;
     /**
-     * 尽量长一点，防止接口过多来不及发布
-     */
-    private Long sessionTimeout = 10000L;
-    /**
      * 请求Mars-Cloud接口超时时间
      */
     private Long timeOut = 10000L;
@@ -35,6 +31,11 @@ public class CloudConfig {
     private String ip;
 
     /**
+     * 接口缓存失效时间
+     */
+    private long apiTimeOut = 3000L;
+
+    /**
      * 是否作为一个网关
      */
     private boolean gateWay = false;
@@ -45,14 +46,6 @@ public class CloudConfig {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Long getSessionTimeout() {
-        return sessionTimeout;
-    }
-
-    public void setSessionTimeout(Long sessionTimeout) {
-        this.sessionTimeout = sessionTimeout;
     }
 
     public Long getTimeOut() {
@@ -93,6 +86,14 @@ public class CloudConfig {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public long getApiTimeOut() {
+        return apiTimeOut;
+    }
+
+    public void setApiTimeOut(long apiTimeOut) {
+        this.apiTimeOut = apiTimeOut;
     }
 
     public boolean isGateWay() {

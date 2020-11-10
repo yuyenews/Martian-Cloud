@@ -2,8 +2,9 @@ package com.mars.cloud.core.notice;
 
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.core.cache.ServerApiCache;
+import com.mars.cloud.core.cache.ServerApiCacheManager;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
-import com.mars.cloud.core.notice.model.RestApiVO;
+import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.cloud.core.util.NoticeUtil;
 import com.mars.cloud.util.MarsCloudConfigUtil;
 import com.mars.cloud.util.MarsCloudUtil;
@@ -15,11 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 往nacos注册服务
+ * 通知器
  */
 public class MartianNotice {
 
@@ -45,6 +47,7 @@ public class MartianNotice {
             /* 获取本服务的名称 */
             String serverName = MarsCloudConfigUtil.getCloudName();
 
+            /* 获取传染渠道 */
             String contagions = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getContagions();
             if(StringUtil.isNull(contagions)){
                 throw new Exception("传染渠道不可以为空, 否则本服务将被孤立");
@@ -57,38 +60,41 @@ public class MartianNotice {
             /* 从内存中获取本项目的MarsApi */
             List<RestApiCacheModel> restApiModelList = getMarsApis();
             for (RestApiCacheModel restApiModel : restApiModelList) {
-                serverApiCache.addCache(serverName, restApiModel.getMethodName(), restApiModel);
+                serverApiCache.addCache(serverName, restApiModel.getMethodName(), restApiModel, true);
             }
 
             /* 发起广播 */
             doNotice(serverName, restApiModelList);
         } catch (Exception e){
-            throw new Exception("注册与发布接口失败", e);
+            throw new Exception("接口传染失败", e);
         }
     }
 
     /**
-     * 将本地接口通知到所有的服务
+     * 将自己的接口传染给所有的服务
      * @param serverName
      * @param restApiModelList
      * @throws Exception
      */
     private void doNotice(String serverName, List<RestApiCacheModel> restApiModelList) throws Exception {
 
-        Map<String, List<RestApiCacheModel>> restApiCacheModelMap = serverApiCache.getRestApiModelsByKey();
+        /* 获取即将被传染的服务 */
+        List<String> contagionList = ServerApiCacheManager.getAllServerList(true);
+        if(contagionList == null || contagionList.size() < 1){
+            return;
+        }
 
-        RestApiVO restApiVO = new RestApiVO();
-        restApiVO.setServerName(serverName);
-        restApiVO.setRestApiCacheModels(restApiModelList);
+        /* 发起广播将自己的接口广播出去 */
+        RestApiModel restApiModel = new RestApiModel();
+        restApiModel.setServerName(serverName);
+        restApiModel.setRestApiCacheModels(restApiModelList);
 
-        for(List<RestApiCacheModel> restApiCacheModels : restApiCacheModelMap.values()){
-            for(RestApiCacheModel restApiCacheModel : restApiCacheModels){
-                StringBuffer stringBuffer = new StringBuffer();
-                stringBuffer.append(restApiCacheModel.getLocalHost());
-                stringBuffer.append("/");
-                stringBuffer.append(MarsCloudConstant.ADD_APIS);
-                NoticeUtil.addApis(stringBuffer.toString(), restApiVO);
-            }
+        for(String contagionUrl : contagionList){
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append(contagionUrl);
+            stringBuffer.append("/");
+            stringBuffer.append(MarsCloudConstant.ADD_APIS);
+            NoticeUtil.addApis(stringBuffer.toString(), restApiModel);
         }
     }
 
@@ -98,24 +104,54 @@ public class MartianNotice {
      * @throws Exception
      */
     private void getApis(String[] contagionList) throws Exception {
+        List<String> cacheServerList = ServerApiCacheManager.getAllServerList(true);
+
+        /* 优先从自己缓存的服务上获取接口 */
+        for(String url : cacheServerList){
+            String getApisUrl = url + "/" + MarsCloudConstant.GET_APIS;
+            boolean isSuccess = getRemoteApis(getApisUrl);
+            if(isSuccess){
+                /* 从任意服务器上拉取成功，就停止 */
+                return;
+            }
+        }
+
+        /* 如果从自己缓存的服务上没有获取到接口，则从配置的服务商拉取 */
         for(String contagion : contagionList){
             String getApisUrl = contagion + "/" + MarsCloudConstant.GET_APIS;
+            boolean isSuccess = getRemoteApis(getApisUrl);
+            if(isSuccess){
+                /* 从任意服务器上拉取成功，就停止 */
+                return;
+            }
+        }
+    }
 
-            Map<String, List<RestApiCacheModel>> restApiCacheModelMap = NoticeUtil.getApis(getApisUrl);
-            if(restApiCacheModelMap == null || restApiCacheModelMap.size() < 1){
-                continue;
+    /**
+     * 从其他服务器拉取接口
+     * @param getApisUrl
+     * @return
+     */
+    private boolean getRemoteApis(String getApisUrl) {
+        try {
+            Map<String, List<RestApiCacheModel>> remoteCacheModelMap = NoticeUtil.getApis(getApisUrl);
+            if(remoteCacheModelMap == null || remoteCacheModelMap.size() < 1){
+                return false;
             }
 
-            for(Map.Entry<String, List<RestApiCacheModel>> entry : restApiCacheModelMap.entrySet()){
+            for(Map.Entry<String, List<RestApiCacheModel>> entry : remoteCacheModelMap.entrySet()){
                 List<RestApiCacheModel> restApiCacheModels = entry.getValue();
                 if(restApiCacheModels == null || restApiCacheModels.size() < 1){
-                    continue;
+                    return false;
                 }
                 for(RestApiCacheModel restApiCacheModel : restApiCacheModels){
-                    serverApiCache.addCache(entry.getKey(), restApiCacheModel);
+                    serverApiCache.addCache(entry.getKey(), restApiCacheModel, false);
                 }
             }
-            break;
+            return true;
+        } catch (Exception e) {
+            marsLogger.warn("拉取接口异常");
+            return false;
         }
     }
 
@@ -145,7 +181,7 @@ public class MartianNotice {
             restApiModel.setMethodName(mName);
             restApiModel.setLocalHost(MarsCloudUtil.getLocalHost());
             restApiModel.setReqMethod(marsMappingModel.getReqMethod());
-
+            restApiModel.setCreateTime(new Date());
             restApiModelList.add(restApiModel);
         }
 

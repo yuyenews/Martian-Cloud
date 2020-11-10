@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 接收广播的实体类
  */
-public class RestApiVO {
+public class RestApiModel {
 
     private String serverName;
 

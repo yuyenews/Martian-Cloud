@@ -2,12 +2,15 @@ package com.mars.cloud.core.cache.model;
 
 import com.mars.common.annotation.enums.ReqMethod;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * rest接口实体类
  */
-public class RestApiCacheModel {
+public class RestApiCacheModel implements Serializable {
+
+    private static final long serialVersionUID = 1668642658421887547L;
 
     /**
      * url

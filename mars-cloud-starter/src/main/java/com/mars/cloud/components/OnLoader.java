@@ -8,11 +8,15 @@ import com.mars.common.annotation.bean.MarsOnLoad;
 import com.mars.common.base.BaseOnLoad;
 import com.mars.iserver.par.factory.ParamAndResultFactory;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  * 启动时事件
  */
 @MarsOnLoad
 public class OnLoader implements BaseOnLoad {
+
+    public static CountDownLatch countDownLatch = new CountDownLatch(1);
 
     /**
      * 加载feign对象
@@ -25,25 +29,20 @@ public class OnLoader implements BaseOnLoad {
     }
 
     /**
-     * 注册服务
+     * 传染服务接口
      * @throws Exception
      */
     @Override
     public void after() throws Exception {
         boolean isGateWay = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().isGateWay();
-        if(isGateWay){
-            /*
-                如果当前服务是一个网关，那么就不需要发布了，也不需要用序列化返回，
-                不过网关建议用mars-gateWay做
-             */
-            return;
+        if(!isGateWay){
+            /* 如果当前服务不是一个网关，则采用序列化的方式响应数据 */
+            ParamAndResultFactory.setBaseParamAndResult(new MarsCloudParamAndResult());
         }
 
-        /* 指定 处理参数和响应的对象实例 */
-        ParamAndResultFactory.setBaseParamAndResult(new MarsCloudParamAndResult());
-
-        /* 注册服务 */
+        /* 传染服务接口 */
         MartianNotice martianNotice = new MartianNotice();
         martianNotice.notice();
+        countDownLatch.countDown();
     }
 }
