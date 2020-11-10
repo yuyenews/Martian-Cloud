@@ -8,15 +8,11 @@ import com.mars.common.annotation.bean.MarsOnLoad;
 import com.mars.common.base.BaseOnLoad;
 import com.mars.iserver.par.factory.ParamAndResultFactory;
 
-import java.util.concurrent.CountDownLatch;
-
 /**
  * 启动时事件
  */
 @MarsOnLoad
 public class OnLoader implements BaseOnLoad {
-
-    public static CountDownLatch countDownLatch = new CountDownLatch(1);
 
     /**
      * 加载feign对象
@@ -43,6 +39,5 @@ public class OnLoader implements BaseOnLoad {
         /* 传染服务接口 */
         MartianNotice martianNotice = new MartianNotice();
         martianNotice.notice();
-        countDownLatch.countDown();
     }
 }

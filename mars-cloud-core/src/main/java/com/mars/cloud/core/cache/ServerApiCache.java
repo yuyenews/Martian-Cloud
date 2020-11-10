@@ -30,6 +30,15 @@ public class ServerApiCache {
     }
 
     /**
+     * 替换所有接口缓存
+     * @param restApiModelMap
+     */
+    public void saveRestApiCacheModelMap(Map<String, List<RestApiCacheModel>> restApiModelMap){
+        marsContext.remove(REST_API_KEY);
+        marsContext.setAttr(REST_API_KEY, restApiModelMap);
+    }
+
+    /**
      * 添加服务缓存
      * @param serverName
      * @param methodName

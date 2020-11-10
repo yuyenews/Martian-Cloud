@@ -26,9 +26,6 @@ public class Timers {
     @MarsTimer(loop = 3000)
     public void doNotice(){
         try {
-            if(OnLoader.countDownLatch.getCount() > 0){
-                return;
-            }
             martianNotice.notice();
         } catch (Exception e){
             logger.error("刷新本地服务缓存失败，10秒后将重试", e);
