@@ -42,7 +42,7 @@ public class MartianNotice {
      */
     public void notice() throws Exception {
         try {
-            marsLogger.info("接口广播中.......");
+            marsLogger.info("接口传染中.......");
 
             /* 获取本服务的名称 */
             String serverName = MarsCloudConfigUtil.getCloudName();
