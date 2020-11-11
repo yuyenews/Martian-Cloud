@@ -10,7 +10,7 @@ public class RandomUtil {
     private static Random random = new Random();
 
     /**
-     * 获取随机数
+     * 获取[0-length]的随机数
      * @param length
      * @return
      */

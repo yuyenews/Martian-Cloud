@@ -2,7 +2,7 @@ package com.mars.cloud.request.balanced.impl;
 
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.request.balanced.BalancedCalc;
-import com.mars.server.server.request.HttpMarsContext;
+import com.mars.common.constant.MarsSpace;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class BalancedCalcPolling implements BalancedCalc {
 
-    private HttpMarsContext httpMarsContext = HttpMarsContext.getHttpContext();
+    private MarsSpace marsSpace = MarsSpace.getEasySpace();
 
     private final String POLLING_MAP = "pollingMap";
 
@@ -77,9 +77,9 @@ public class BalancedCalcPolling implements BalancedCalc {
      */
     private Map<String, AtomicInteger> getPollingMap(){
         Map<String, AtomicInteger> pollingMap = new ConcurrentHashMap<>();
-        Object obj = httpMarsContext.getAttr(POLLING_MAP);
+        Object obj = marsSpace.getAttr(POLLING_MAP);
         if(obj == null){
-            httpMarsContext.setAttr(POLLING_MAP, pollingMap);
+            marsSpace.setAttr(POLLING_MAP, pollingMap);
         } else {
             pollingMap = (Map<String, AtomicInteger>)obj;
         }
