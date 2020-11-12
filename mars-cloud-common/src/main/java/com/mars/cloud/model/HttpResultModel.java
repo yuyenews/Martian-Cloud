@@ -1,5 +1,7 @@
 package com.mars.cloud.model;
 
+import okhttp3.ResponseBody;
+
 import java.io.InputStream;
 
 /**
@@ -9,7 +11,9 @@ public class HttpResultModel {
 
     private String fileName;
 
-    private InputStream inputStream;
+    private int code;
+
+    private ResponseBody responseBody;
 
     public String getFileName() {
         return fileName;
@@ -20,10 +24,30 @@ public class HttpResultModel {
     }
 
     public InputStream getInputStream() {
-        return inputStream;
+        return responseBody.byteStream();
     }
 
-    public void setInputStream(InputStream inputStream) {
-        this.inputStream = inputStream;
+    public String getJSONString() {
+        try {
+            return responseBody.string();
+        } catch (Exception e){
+            return null;
+        }
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public ResponseBody getResponseBody() {
+        return responseBody;
+    }
+
+    public void setResponseBody(ResponseBody responseBody) {
+        this.responseBody = responseBody;
     }
 }

@@ -1,7 +1,9 @@
 package com.mars.cloud.util;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.mars.common.util.SerializableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
@@ -9,6 +11,8 @@ import java.io.*;
  * 序列化与反序列化工具类
  */
 public class SerializableCloudUtil {
+
+    private static Logger logger = LoggerFactory.getLogger(SerializableCloudUtil.class);
 
     /**
      * 将对象序列化成二进制流
@@ -41,6 +45,7 @@ public class SerializableCloudUtil {
      * @throws Exception 异常
      */
     public static <T> T deSerialization(InputStream inputStream,Class<T> cls) throws Exception {
+        Object object = null;
         try {
             if(inputStream == null){
                 return null;
@@ -50,14 +55,15 @@ public class SerializableCloudUtil {
                 return (T) inputStream;
             }
 
-            Object object = SerializableUtil.deSerialization(inputStream, Object.class);
-            if(cls.equals(Object.class) || cls.equals(object.getClass())){
-                return (T) object;
-            } else {
-                throw new Exception("无法将" + object.getClass().getName() + "类型转成" + cls.getName() + "类型，原数据：" + JSON.toJSONString(object));
-            }
+            object = SerializableUtil.deSerialization(inputStream, Object.class);
+            return (T) object;
         } catch (Exception e) {
-            throw new Exception("将二进制流反序列化成参数，出现异常", e);
+            String errorMag = "将二进制流反序列化成源对象出现异常";
+            if(object != null){
+                errorMag = errorMag + ",原数据:" + JSONObject.toJSONString(object);
+            }
+            logger.error(errorMag, e);
+            throw new Exception(errorMag, e);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.mars.cloud.components;
 
+import com.mars.cloud.core.cache.ServerApiCacheManager;
 import com.mars.cloud.core.notice.MartianNotice;
 import com.mars.cloud.request.feign.load.LoadMarsFeign;
 import com.mars.cloud.request.util.MarsCloudParamAndResult;
@@ -35,6 +36,9 @@ public class OnLoader implements BaseOnLoad {
             /* 如果当前服务不是一个网关，则采用序列化的方式响应数据 */
             ParamAndResultFactory.setBaseParamAndResult(new MarsCloudParamAndResult());
         }
+
+        /* 将自己的接口加载到本地缓存 */
+        ServerApiCacheManager.loadLocalApis();
 
         /* 传染服务接口 */
         MartianNotice martianNotice = new MartianNotice();

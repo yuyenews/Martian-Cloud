@@ -3,10 +3,7 @@ package com.mars.cloud.core.cache;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.common.constant.MarsSpace;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -44,34 +41,37 @@ public class ServerApiCache {
      * @param methodName
      * @param restApiCacheModel
      */
-    public void addCache(String serverName, String methodName, RestApiCacheModel restApiCacheModel, boolean updateTime){
+    public void addCache(String serverName, String methodName, RestApiCacheModel restApiCacheModel){
         String key = getKey(serverName,methodName);
-        addCache(key, restApiCacheModel, updateTime);
+        addCache(key, restApiCacheModel);
     }
 
     /**
      * 添加服务缓存
      * @param restApiCacheModel
      */
-    public synchronized void addCache(String key, RestApiCacheModel restApiCacheModel, boolean updateTime){
+    public synchronized void addCache(String key, RestApiCacheModel restApiCacheModel){
         Map<String, List<RestApiCacheModel>> restApiModelMap = getRestApiModelsByKey();
 
         List<RestApiCacheModel> restApiCacheModelList = restApiModelMap.get(key);
         if(restApiCacheModelList == null){
-            restApiCacheModelList = new ArrayList<>();
+            restApiCacheModelList = Collections.synchronizedList(new ArrayList<>());
         }
         RestApiCacheModel item = contains(restApiCacheModelList, restApiCacheModel);
         if(item != null){
-            restApiCacheModelList.remove(item);
+            if(item.getCreateTime() < restApiCacheModel.getCreateTime()){
+                /* 如果刚拿来的元素，创建时间比较新，那就重置创建时间 */
+                item.setCreateTime(restApiCacheModel.getCreateTime());
+            }
+
+            /* 只要元素存在，就return，不往下执行 */
+            return;
         }
-        if(updateTime){
-            restApiCacheModel.setCreateTime(new Date());
-        }
+
         restApiCacheModelList.add(restApiCacheModel);
 
         restApiModelMap.put(key, restApiCacheModelList);
         marsContext.setAttr(REST_API_KEY, restApiModelMap);
-
     }
 
     /**
@@ -95,6 +95,15 @@ public class ServerApiCache {
      */
     public String getKey(String serverName, String methodName){
         return serverName + "-" + methodName;
+    }
+
+    /**
+     * 从key里面提取服务名词
+     * @param key
+     * @return
+     */
+    public String getServerNameFormKey(String key){
+        return key.split("-")[0];
     }
 
     /**

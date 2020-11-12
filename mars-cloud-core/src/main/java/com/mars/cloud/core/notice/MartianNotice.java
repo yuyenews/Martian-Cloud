@@ -6,17 +6,12 @@ import com.mars.cloud.core.cache.ServerApiCacheManager;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.cloud.core.util.NoticeUtil;
+import com.mars.cloud.core.vote.VoteManager;
 import com.mars.cloud.util.MarsCloudConfigUtil;
-import com.mars.cloud.util.MarsCloudUtil;
-import com.mars.common.constant.MarsConstant;
-import com.mars.common.constant.MarsSpace;
 import com.mars.common.util.StringUtil;
-import com.mars.mvc.load.model.MarsMappingModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +21,6 @@ import java.util.Map;
 public class MartianNotice {
 
     private Logger marsLogger = LoggerFactory.getLogger(MartianNotice.class);
-
-    /**
-     * 获取全局存储空间
-     */
-    private MarsSpace constants = MarsSpace.getEasySpace();
 
     /**
      * 本地缓存
@@ -44,9 +34,6 @@ public class MartianNotice {
         try {
             marsLogger.info("接口传染中.......");
 
-            /* 获取本服务的名称 */
-            String serverName = MarsCloudConfigUtil.getCloudName();
-
             /* 获取传染渠道 */
             String contagions = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getContagions();
             if(StringUtil.isNull(contagions)){
@@ -57,14 +44,11 @@ public class MartianNotice {
             String[] contagionList = contagions.split(",");
             getApis(contagionList);
 
-            /* 从内存中获取本项目的MarsApi */
-            List<RestApiCacheModel> restApiModelList = getMarsApis();
-            for (RestApiCacheModel restApiModel : restApiModelList) {
-                serverApiCache.addCache(serverName, restApiModel.getMethodName(), restApiModel, true);
-            }
-
             /* 发起广播 */
-            doNotice(serverName, restApiModelList);
+            doNotice();
+
+            /* 重新初始化本地的投票列表 */
+            VoteManager.loadVote();
         } catch (Exception e){
             throw new Exception("接口传染失败", e);
         }
@@ -72,11 +56,9 @@ public class MartianNotice {
 
     /**
      * 将自己的接口传染给所有的服务
-     * @param serverName
-     * @param restApiModelList
      * @throws Exception
      */
-    private void doNotice(String serverName, List<RestApiCacheModel> restApiModelList) throws Exception {
+    private void doNotice() throws Exception {
 
         /* 获取即将被传染的服务 */
         List<String> contagionList = ServerApiCacheManager.getAllServerList(true);
@@ -84,17 +66,31 @@ public class MartianNotice {
             return;
         }
 
+        /* 获取本服务的名称 */
+        String serverName = MarsCloudConfigUtil.getCloudName();
+
+        /* 从内存中获取本项目的MarsApi */
+        List<RestApiCacheModel> restApiModelList = ServerApiCacheManager.getMarsApis();
+
         /* 发起广播将自己的接口广播出去 */
         RestApiModel restApiModel = new RestApiModel();
         restApiModel.setServerName(serverName);
         restApiModel.setRestApiCacheModels(restApiModelList);
 
         for(String contagionUrl : contagionList){
+            /* 如果此服务被通知过了，则跳过 */
+            if(NotifiedManager.isNotified(contagionUrl)){
+                continue;
+            }
+
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append(contagionUrl);
             stringBuffer.append("/");
             stringBuffer.append(MarsCloudConstant.ADD_APIS);
             NoticeUtil.addApis(stringBuffer.toString(), restApiModel);
+
+            /* 记录此服务已经被通知过了 */
+            NotifiedManager.addNotified(contagionUrl);
         }
     }
 
@@ -149,47 +145,16 @@ public class MartianNotice {
                 if(restApiCacheModels == null || restApiCacheModels.size() < 1){
                     continue;
                 }
-                for(RestApiCacheModel restApiCacheModel : restApiCacheModels){
-                    serverApiCache.addCache(entry.getKey(), restApiCacheModel, false);
-                }
+
+                RestApiModel restApiModel = new RestApiModel();
+                restApiModel.setServerName(serverApiCache.getServerNameFormKey(entry.getKey()));
+                restApiModel.setRestApiCacheModels(restApiCacheModels);
+                ServerApiCacheManager.addCacheApi(restApiModel);
             }
             return true;
         } catch (Exception e) {
             marsLogger.warn("拉取接口异常");
             return false;
         }
-    }
-
-    /**
-     * 获取所有API
-     * @return
-     */
-    private List<RestApiCacheModel> getMarsApis() throws Exception {
-        /* 从内存中获取本项目的MarsApi */
-        Object apiMap = constants.getAttr(MarsConstant.CONTROLLER_OBJECTS);
-        if (apiMap == null) {
-            return new ArrayList<>();
-        }
-
-        List<RestApiCacheModel> restApiModelList = new ArrayList<>();
-
-        Map<String, MarsMappingModel> marsApiObjects = (Map<String, MarsMappingModel>) apiMap;
-        for(String methodName : marsApiObjects.keySet()){
-            MarsMappingModel marsMappingModel = marsApiObjects.get(methodName);
-            if(marsMappingModel == null){
-                continue;
-            }
-            String mName = marsMappingModel.getExeMethod().getName();
-
-            RestApiCacheModel restApiModel = new RestApiCacheModel();
-            restApiModel.setUrl(MarsCloudUtil.getLocalHost() + "/" + mName);
-            restApiModel.setMethodName(mName);
-            restApiModel.setLocalHost(MarsCloudUtil.getLocalHost());
-            restApiModel.setReqMethod(marsMappingModel.getReqMethod());
-            restApiModel.setCreateTime(new Date());
-            restApiModelList.add(restApiModel);
-        }
-
-        return restApiModelList;
     }
 }

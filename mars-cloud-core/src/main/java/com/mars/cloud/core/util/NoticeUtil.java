@@ -1,14 +1,18 @@
 package com.mars.cloud.core.util;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.mars.cloud.constant.HttpStatusConstant;
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.core.cache.ServerApiCache;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
+import com.mars.cloud.core.notice.model.NotifiedModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.cloud.model.HttpResultModel;
 import com.mars.cloud.util.HttpCommons;
 import com.mars.cloud.util.RandomUtil;
 import com.mars.cloud.util.SerializableCloudUtil;
+import com.mars.common.util.StringUtil;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +46,21 @@ public class NoticeUtil {
         Request request = builder.url(url).build();
 
         HttpResultModel httpResultModel = HttpCommons.okCall(okHttpClient, request);
-        Map<String, List<RestApiCacheModel>> restApiCacheModelMap = SerializableCloudUtil.deSerialization(httpResultModel.getInputStream(), ConcurrentHashMap.class);
 
-        return restApiCacheModelMap;
+        if (httpResultModel.getCode() != HttpStatusConstant.SUCCESS.getCode()){
+            return null;
+        }
+
+        if(StringUtil.isNull(httpResultModel.getFileName())) {
+            String result = httpResultModel.getJSONString();
+            if(!StringUtil.isNull(result)){
+                return JSONObject.parseObject(result, ConcurrentHashMap.class);
+            }
+        } else {
+            return SerializableCloudUtil.deSerialization(httpResultModel.getInputStream(), ConcurrentHashMap.class);
+        }
+
+        return null;
     }
 
     /**
@@ -61,22 +77,75 @@ public class NoticeUtil {
             if (restApiModel != null) {
                 jsonStrParam = JSON.toJSONString(restApiModel);
             }
-            OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
-
-            MediaType mediaType = MediaType.parse(MarsCloudConstant.CONTENT_TYPE_JSON);
-            RequestBody requestbody = RequestBody.create(jsonStrParam, mediaType);
-
-            Request.Builder builder = new Request.Builder();
-            builder.post(requestbody);
-
-            Request request = builder.url(url).build();
-
-            HttpCommons.okCall(okHttpClient, request);
-            return true;
+            return doNotice(url, jsonStrParam);
         } catch (Exception e) {
             marsLogger.warn("发送广播异常");
             return false;
         }
+    }
+
+    /**
+     * 通知被下线的服务，让他把我从已广播列表移除，防止误判
+     * @param url
+     * @param notifiedModel
+     * @return
+     */
+    public static boolean removeNotified(String url, NotifiedModel notifiedModel) {
+        try {
+            String jsonStrParam = "{}";
+            if (notifiedModel != null) {
+                jsonStrParam = JSON.toJSONString(notifiedModel);
+            }
+            return doNotice(url, jsonStrParam);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 发送通知
+     * @param url
+     * @param jsonStrParam
+     * @throws Exception
+     */
+    private static boolean doNotice(String url, String jsonStrParam) throws Exception {
+        OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
+
+        MediaType mediaType = MediaType.parse(MarsCloudConstant.CONTENT_TYPE_JSON);
+        RequestBody requestbody = RequestBody.create(jsonStrParam, mediaType);
+
+        Request.Builder builder = new Request.Builder();
+        builder.post(requestbody);
+
+        Request request = builder.url(url).build();
+
+        HttpResultModel httpResultModel = HttpCommons.okCall(okHttpClient, request);
+        return isSuccess(httpResultModel);
+    }
+
+    /**
+     * 是否成功
+     * @param httpResultModel
+     * @return
+     * @throws Exception
+     */
+    private static boolean isSuccess(HttpResultModel httpResultModel) throws Exception {
+        if (httpResultModel.getCode() != HttpStatusConstant.SUCCESS.getCode()){
+            return false;
+        }
+
+        if(StringUtil.isNull(httpResultModel.getFileName())) {
+            String result = httpResultModel.getJSONString();
+            if(!StringUtil.isNull(result) && result.equals(MarsCloudConstant.RESULT_SUCCESS)){
+                return true;
+            }
+        } else {
+            String result = SerializableCloudUtil.deSerialization(httpResultModel.getInputStream(), String.class);
+            if (result.equals(MarsCloudConstant.RESULT_SUCCESS)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

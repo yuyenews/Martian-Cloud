@@ -31,9 +31,9 @@ public class CloudConfig {
     private String ip;
 
     /**
-     * 接口缓存失效时间
+     * 下线票数
      */
-    private long apiTimeOut = 3000L;
+    private int offlineVote = 5;
 
     /**
      * 是否作为一个网关
@@ -88,12 +88,12 @@ public class CloudConfig {
         this.ip = ip;
     }
 
-    public long getApiTimeOut() {
-        return apiTimeOut;
+    public int getOfflineVote() {
+        return offlineVote;
     }
 
-    public void setApiTimeOut(long apiTimeOut) {
-        this.apiTimeOut = apiTimeOut;
+    public void setOfflineVote(int offlineVote) {
+        this.offlineVote = offlineVote;
     }
 
     public boolean isGateWay() {

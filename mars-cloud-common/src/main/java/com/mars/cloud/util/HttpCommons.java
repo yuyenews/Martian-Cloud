@@ -1,5 +1,6 @@
 package com.mars.cloud.util;
 
+import com.mars.cloud.constant.HttpStatusConstant;
 import com.mars.cloud.model.HttpResultModel;
 import okhttp3.*;
 
@@ -19,17 +20,18 @@ public class HttpCommons {
         Call call = okHttpClient.newCall(request);
         Response response = call.execute();
 
-        int code = response.code();
-        ResponseBody responseBody = response.body();
-        if (code != 200) {
-            throw new Exception("请求接口出现异常:" + responseBody.string());
-        }
         HttpResultModel httpResultModel = new HttpResultModel();
+        httpResultModel.setCode(response.code());
+
+        if (httpResultModel.getCode() != HttpStatusConstant.SUCCESS.getCode()) {
+            return httpResultModel;
+        }
+
+        ResponseBody responseBody = response.body();
         String head = response.header("Content-Disposition");
 
         httpResultModel.setFileName(head);
-        httpResultModel.setInputStream(responseBody.byteStream());
-
+        httpResultModel.setResponseBody(responseBody);
         return httpResultModel;
     }
 
@@ -42,8 +44,8 @@ public class HttpCommons {
     public static OkHttpClient getOkHttpClient() throws Exception {
         long timeOut = getTimeOut();
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(timeOut, TimeUnit.SECONDS)//设置连接超时时间
-                .readTimeout(timeOut, TimeUnit.SECONDS)//设置读取超时时间
+                .connectTimeout(timeOut, TimeUnit.MILLISECONDS)
+                .readTimeout(timeOut, TimeUnit.MILLISECONDS)
                 .build();
         return okHttpClient;
     }
@@ -57,7 +59,7 @@ public class HttpCommons {
         try {
             return MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getTimeOut();
         } catch (Exception e) {
-            return 100L;
+            return 5000L;
         }
     }
 }

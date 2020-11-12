@@ -11,9 +11,34 @@ public class MarsCloudConstant {
     public static final String GET_APIS = "getApis";
 
     /**
-     * 添加接口
+     * 接收广播
      */
     public static final String ADD_APIS  = "addApis";
+
+    /**
+     * 通知已将此服务下线
+     */
+    public static final String REMOVE_NOTIFIED = "removeNotified";
+
+    /**
+     * 通知成功的返回值
+     */
+    public static final String RESULT_SUCCESS = "ok";
+
+    /**
+     * 通知失败的返回值
+     */
+    public static final String RESULT_ERROR = "error";
+
+    /**
+     * 下线通知列表前缀
+     */
+    public static final String OFFLINE_NOTICE = "offlineNotice";
+
+    /**
+     * 本地接口们
+     */
+    public static final String LOCAL_APIS = "martianCloudLocalApis";
 
     /**
      * JSON提交的请求头

@@ -1,7 +1,7 @@
 package com.mars.cloud.components;
 
-import com.mars.cloud.core.cache.ServerApiCacheManager;
 import com.mars.cloud.core.notice.MartianNotice;
+import com.mars.cloud.core.offline.OfflineManager;
 import com.mars.common.annotation.bean.MarsBean;
 import com.mars.common.annotation.bean.MarsTimer;
 import org.slf4j.Logger;
@@ -33,12 +33,13 @@ public class Timers {
     }
 
     /**
-     * 2秒清理一次超时接口
+     * 因为禁用可能存在误判，所以做了个补偿机制
+     * 2秒通知一次被禁用的服务，让他把我从已广播列表移除，方便下次给我发广播
      */
     @MarsTimer(loop = 2000)
-    public void clearTimeOutApis(){
+    public void offline(){
         try {
-            ServerApiCacheManager.clearTimeOutApis();
+            OfflineManager.doOffline();
         } catch (Exception e){
             logger.error("清理本地过期接口异常，10秒后将重试", e);
         }

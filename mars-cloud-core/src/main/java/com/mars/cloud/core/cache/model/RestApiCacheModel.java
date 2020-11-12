@@ -35,7 +35,7 @@ public class RestApiCacheModel implements Serializable {
     /**
      * 创建时间
      */
-    private Date createTime;
+    private long createTime;
 
     public String getUrl() {
         return url;
@@ -69,11 +69,11 @@ public class RestApiCacheModel implements Serializable {
         this.methodName = methodName;
     }
 
-    public Date getCreateTime() {
+    public long getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(long createTime) {
         this.createTime = createTime;
     }
 }

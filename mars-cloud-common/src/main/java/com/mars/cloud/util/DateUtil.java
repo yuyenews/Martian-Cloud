@@ -9,6 +9,39 @@ import java.util.Date;
 public class DateUtil {
 
     /**
+     * 两个时间相差是否大于ran
+     * @param one
+     * @param two
+     * @param ran
+     * @return
+     */
+    public static boolean range(Date one, Date two, long ran){
+        long oneTime = one.getTime();
+        long twoTime = two.getTime();
+        return range(oneTime, twoTime, ran);
+    }
+
+    /**
+     * 两个时间相差是否大于ran
+     * @param one
+     * @param two
+     * @param ran
+     * @return
+     */
+    public static boolean range(long one, long two, long ran){
+        long sub = one - two;
+        if(sub < 0){
+            sub = sub * -1;
+        }
+
+        if(sub > ran){
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * 两个时间是否在一个范围内
      * @param one
      * @param two
