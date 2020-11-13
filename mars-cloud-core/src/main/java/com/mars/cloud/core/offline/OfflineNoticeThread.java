@@ -49,6 +49,10 @@ public class OfflineNoticeThread implements Runnable {
                 Thread.sleep(1000L);
             }
         } catch (Exception e) {
+            /*
+                这本来就是个保险机制，请求出现异常是正常现象，要是通了才不正常
+                所以这里 什么都不处理，静静的就好
+             */
         }
     }
 }
