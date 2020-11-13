@@ -1,8 +1,6 @@
 package com.mars.cloud.core.offline;
 
-import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.core.cache.ServerApiCacheManager;
-import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.NotifiedManager;
 import com.mars.cloud.core.notice.model.NotifiedModel;
 import com.mars.cloud.core.vote.VoteManager;
@@ -25,10 +23,16 @@ public class OfflineManager {
      * @param host
      */
     public static void needOffline(String host, Long createTime){
+        if(isDisable(host)){
+            /* 如果已经下线了，就不需要做后面的逻辑了 */
+            return;
+        }
+
         VoteManager.addVote(host);
         int voteNum = VoteManager.getVoteNum(host);
         int maxVoteNum = MarsCloudConfigUtil.getMaxVoteNum();
 
+        /* 如果票数达到了下线票，就让其下线 */
         if(voteNum >= maxVoteNum){
             disableMap.put(host, createTime);
         }
@@ -57,6 +61,16 @@ public class OfflineManager {
     }
 
     /**
+     * 移除禁用标识
+     * @param host
+     */
+    public static void removeDisable(String host){
+        if(disableMap.containsKey(host)){
+            disableMap.remove(host);
+        }
+    }
+
+    /**
      * 获取被禁用的api的创建时间
      * @param host
      * @return
@@ -75,44 +89,16 @@ public class OfflineManager {
      */
     public static void doOffline() throws Exception {
         /* 筛选已经下线的host，从本地删除后返回 */
-        Set<String> offlineHostList = new HashSet<>();
-
-        Map<String, List<RestApiCacheModel>> restApiCacheMap = ServerApiCacheManager.getCacheApisMap();
-
-        Set<String> onRemoveKeys = new HashSet<>();
-        for(String key : restApiCacheMap.keySet()){
-            List<RestApiCacheModel> restApiCacheModelList = restApiCacheMap.get(key);
-            if(restApiCacheModelList == null || restApiCacheModelList.size() < 1){
-                continue;
-            }
-
-            List<RestApiCacheModel> removeObj = new ArrayList<>();
-            for(RestApiCacheModel restApiCacheModel : restApiCacheModelList){
-                if(OfflineManager.isDisable(restApiCacheModel.getLocalHost())){
-                    removeObj.add(restApiCacheModel);
-                    offlineHostList.add(restApiCacheModel.getLocalHost());
-
-                    NotifiedManager.removeNotified(restApiCacheModel.getLocalHost());
-                    VoteManager.removeVote(restApiCacheModel.getLocalHost());
-                }
-            }
-            if(removeObj.size() > 0){
-                restApiCacheModelList.removeAll(removeObj);
-            }
-
-            if(restApiCacheModelList == null || restApiCacheModelList.size() < 1){
-                onRemoveKeys.add(key);
-            }
-            restApiCacheMap.put(key, restApiCacheModelList);
-        }
-        /* 清理value长度为0的元素 */
-        for(String key : onRemoveKeys){
-            restApiCacheMap.remove(key);
-        }
+        Set<String> offlineHostSet = ServerApiCacheManager.getOfflineHost();
 
         /* 给下线的服务发通知 */
-        for(String offlineHost : offlineHostList){
+        for(String offlineHost : offlineHostSet){
 
+            /* 服务从本地缓存中删除后，需要清理已通知列表和投票列表，节约内存 */
+            NotifiedManager.removeNotified(offlineHost);
+            VoteManager.removeVote(offlineHost);
+
+            /* 为了防止是误判，所以需要给被下线的服务发送通知，让他把我从已通知列表移除 */
             NotifiedModel notifiedModel = new NotifiedModel();
             notifiedModel.setServerInfo(MarsCloudUtil.getLocalHost());
             noticeOfflineServer(offlineHost, notifiedModel);
@@ -127,17 +113,9 @@ public class OfflineManager {
      * @param notifiedModel
      */
     private static void noticeOfflineServer(String offlineHost, NotifiedModel notifiedModel){
-        String key = MarsCloudConstant.OFFLINE_NOTICE + offlineHost;
-
-        if(NotifiedManager.isNotified(key)){
-            return;
-        }
-
         OfflineNoticeThread offlineNoticeThread = new OfflineNoticeThread();
         offlineNoticeThread.setOfflineHost(offlineHost);
         offlineNoticeThread.setNotifiedModel(notifiedModel);
-        offlineNoticeThread.setKey(key);
         ThreadPool.getThreadPoolExecutor().execute(offlineNoticeThread);
-
     }
 }

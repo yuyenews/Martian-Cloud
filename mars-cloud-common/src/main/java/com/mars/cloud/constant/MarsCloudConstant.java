@@ -31,11 +31,6 @@ public class MarsCloudConstant {
     public static final String RESULT_ERROR = "error";
 
     /**
-     * 下线通知列表前缀
-     */
-    public static final String OFFLINE_NOTICE = "offlineNotice";
-
-    /**
      * 本地接口们
      */
     public static final String LOCAL_APIS = "martianCloudLocalApis";

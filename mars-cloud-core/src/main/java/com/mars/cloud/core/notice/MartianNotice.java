@@ -46,9 +46,6 @@ public class MartianNotice {
 
             /* 发起广播 */
             doNotice();
-
-            /* 重新初始化本地的投票列表 */
-            VoteManager.loadVote();
         } catch (Exception e){
             throw new Exception("接口传染失败", e);
         }
@@ -147,9 +144,9 @@ public class MartianNotice {
                 }
 
                 RestApiModel restApiModel = new RestApiModel();
-                restApiModel.setServerName(serverApiCache.getServerNameFormKey(entry.getKey()));
+                restApiModel.setServerName(ServerApiCache.getServerNameFormKey(entry.getKey()));
                 restApiModel.setRestApiCacheModels(restApiCacheModels);
-                ServerApiCacheManager.addCacheApi(restApiModel);
+                ServerApiCacheManager.addCacheApi(restApiModel, false);
             }
             return true;
         } catch (Exception e) {

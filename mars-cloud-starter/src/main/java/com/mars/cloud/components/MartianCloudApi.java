@@ -6,7 +6,6 @@ import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.NotifiedManager;
 import com.mars.cloud.core.notice.model.NotifiedModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
-import com.mars.cloud.core.vote.VoteManager;
 import com.mars.common.annotation.api.MarsApi;
 import com.mars.common.annotation.api.RequestMethod;
 import com.mars.common.annotation.enums.ReqMethod;
@@ -29,7 +28,6 @@ public class MartianCloudApi {
      * @return
      */
     public Map<String, List<RestApiCacheModel>> getApis(){
-        logger.info("被拉取了接口");
         return ServerApiCacheManager.getCacheApisMap();
     }
 
@@ -46,10 +44,10 @@ public class MartianCloudApi {
             }
 
             logger.info("受到了来自[{}]服务的接口传染,感染接口数量:[{}]", restApiModel.getServerName(), restApiModel.getRestApiCacheModels().size());
-            ServerApiCacheManager.addCacheApi(restApiModel);
 
-            /* 重新初始化本地的投票列表 */
-            VoteManager.loadVote();
+            /* 将收到的接口存入本地缓存 */
+            ServerApiCacheManager.addCacheApi(restApiModel, true);
+
             return MarsCloudConstant.RESULT_SUCCESS;
         } catch (Exception e){
             return MarsCloudConstant.RESULT_ERROR;
@@ -58,7 +56,7 @@ public class MartianCloudApi {
 
     /**
      * 移除已经被通知过的服务，
-     * 在某个服务将此服务下线后，为了防治是误判，所以要给此服务发个通知告诉他
+     * 在某个服务将此服务下线后，为了防止是误判，所以要给此服务发个通知告诉他
      * @return
      */
     @RequestMethod(ReqMethod.POST)

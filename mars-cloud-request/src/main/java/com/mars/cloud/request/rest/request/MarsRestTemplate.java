@@ -114,6 +114,8 @@ public class MarsRestTemplate {
             /* 判断是否已经被熔断，如果没被熔断，就请求此接口 */
             boolean isFuse = FuseFactory.getFuseManager().isFuse(serverName, methodName, restApiCacheModel.getUrl());
             if (isFuse) {
+
+                /* 发起请求获取响应数据 */
                 HttpResultModel httpResultModel = HttpUtil.request(restApiCacheModel, params, contentType, marsHeader);
 
                 /* 如果请求成功，则将下线票清0 */

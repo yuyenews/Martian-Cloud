@@ -34,9 +34,9 @@ public class Timers {
 
     /**
      * 因为禁用可能存在误判，所以做了个补偿机制
-     * 2秒通知一次被禁用的服务，让他把我从已广播列表移除，方便下次给我发广播
+     * 200毫秒通知一次被禁用的服务，让他把我从已广播列表移除，方便下次给我发广播
      */
-    @MarsTimer(loop = 2000)
+    @MarsTimer(loop = 200)
     public void offline(){
         try {
             OfflineManager.doOffline();

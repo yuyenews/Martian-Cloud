@@ -93,7 +93,7 @@ public class ServerApiCache {
      * @param methodName
      * @return
      */
-    public String getKey(String serverName, String methodName){
+    public static String getKey(String serverName, String methodName){
         return serverName + "-" + methodName;
     }
 
@@ -102,7 +102,7 @@ public class ServerApiCache {
      * @param key
      * @return
      */
-    public String getServerNameFormKey(String key){
+    public static String getServerNameFormKey(String key){
         return key.split("-")[0];
     }
 

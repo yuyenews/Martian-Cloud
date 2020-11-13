@@ -1,7 +1,6 @@
 package com.mars.cloud.core.offline;
 
 import com.mars.cloud.constant.MarsCloudConstant;
-import com.mars.cloud.core.notice.NotifiedManager;
 import com.mars.cloud.core.notice.model.NotifiedModel;
 import com.mars.cloud.core.util.NoticeUtil;
 
@@ -20,22 +19,12 @@ public class OfflineNoticeThread implements Runnable {
      */
     private NotifiedModel notifiedModel;
 
-    /**
-     * 记录是否已经通知过的键
-     */
-    private String key;
-
-
     public void setOfflineHost(String offlineHost) {
         this.offlineHost = offlineHost;
     }
 
     public void setNotifiedModel(NotifiedModel notifiedModel) {
         this.notifiedModel = notifiedModel;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
     }
 
     @Override
@@ -54,11 +43,10 @@ public class OfflineNoticeThread implements Runnable {
 
                 boolean isSuccess = NoticeUtil.removeNotified(stringBuffer.toString(), notifiedModel);
                 if (isSuccess) {
-                    NotifiedManager.addNotified(key);
                     return;
                 }
 
-                Thread.sleep(2000L);
+                Thread.sleep(1000L);
             }
         } catch (Exception e) {
         }

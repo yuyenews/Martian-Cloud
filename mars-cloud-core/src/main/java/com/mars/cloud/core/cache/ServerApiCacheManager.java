@@ -1,27 +1,23 @@
 package com.mars.cloud.core.cache;
 
 import com.mars.cloud.constant.MarsCloudConstant;
+import com.mars.cloud.core.blanced.PollingIndexManager;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.cloud.core.offline.OfflineManager;
+import com.mars.cloud.core.vote.VoteManager;
 import com.mars.cloud.util.MarsCloudConfigUtil;
 import com.mars.cloud.util.MarsCloudUtil;
 import com.mars.common.constant.MarsConstant;
 import com.mars.common.constant.MarsSpace;
 import com.mars.mvc.load.model.MarsMappingModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 本地缓存管理
  */
 public class ServerApiCacheManager {
-
-    private static Logger logger = LoggerFactory.getLogger(ServerApiCacheManager.class);
 
     private static ServerApiCache serverApiCache = new ServerApiCache();
 
@@ -38,15 +34,32 @@ public class ServerApiCacheManager {
     /**
      * 保存接口到本地缓存
      * @param restApiModel
+     * @param isNotice
      */
-    public static void addCacheApi(RestApiModel restApiModel) {
+    public static void addCacheApi(RestApiModel restApiModel, boolean isNotice) throws Exception {
+        /* 保存接口至本地缓存 */
         for(RestApiCacheModel restApiCacheModel : restApiModel.getRestApiCacheModels()){
-            long oldCreateTime = OfflineManager.getDisableTime(restApiCacheModel.getLocalHost());
-            if(oldCreateTime >= restApiCacheModel.getCreateTime()){
-                continue;
+
+            boolean isDisable = OfflineManager.isDisable(restApiCacheModel.getLocalHost());
+            if(isDisable){
+                long oldCreateTime = OfflineManager.getDisableTime(restApiCacheModel.getLocalHost());
+                if(isNotice){
+                    /* 如果此接口是服务主动广播过来的，则说明他活着，那就将下线标识移除 */
+                    OfflineManager.removeDisable(restApiCacheModel.getLocalHost());
+                } else if(oldCreateTime >= restApiCacheModel.getCreateTime()){
+                    /* 如果此服务不是主动广播过来的，而是我拉取过来的，那就要判断他的创建时间是否大于被我下线时的时间 */
+                    continue;
+                }
             }
+
             serverApiCache.addCache(restApiModel.getServerName(), restApiCacheModel.getMethodName(), restApiCacheModel);
         }
+
+        /* 重新初始化本地的投票列表 */
+        VoteManager.loadVote();
+
+        /* 初始化轮询下标 */
+        PollingIndexManager.initPollingMap();
     }
 
     /**
@@ -104,6 +117,55 @@ public class ServerApiCacheManager {
     }
 
     /**
+     * 获取下线的host
+     * @return
+     */
+    public static Set<String> getOfflineHost(){
+        Set<String> offlineHostList = new HashSet<>();
+
+        Map<String, List<RestApiCacheModel>> restApiCacheMap = ServerApiCacheManager.getCacheApisMap();
+
+        Set<String> onRemoveKeys = new HashSet<>();
+        int count = 0;
+        for(String key : restApiCacheMap.keySet()){
+            List<RestApiCacheModel> restApiCacheModelList = restApiCacheMap.get(key);
+            if(restApiCacheModelList == null || restApiCacheModelList.size() < 1){
+                continue;
+            }
+
+            List<RestApiCacheModel> removeObj = new ArrayList<>();
+
+            /* 寻找已经下线的服务接口 */
+            for(RestApiCacheModel restApiCacheModel : restApiCacheModelList){
+                if(OfflineManager.isDisable(restApiCacheModel.getLocalHost())){
+                    removeObj.add(restApiCacheModel);
+                    offlineHostList.add(restApiCacheModel.getLocalHost());
+                }
+            }
+
+            /* 删除已经下线的服务的接口 */
+            if(removeObj.size() > 0){
+                restApiCacheModelList.removeAll(removeObj);
+            }
+
+            /* 如果某个key下面的list已经空了，则删除这个key */
+            if(restApiCacheModelList == null || restApiCacheModelList.size() < 1){
+                onRemoveKeys.add(key);
+            }
+            count = count + restApiCacheModelList.size();
+            restApiCacheMap.put(key, restApiCacheModelList);
+        }
+        /* 清理value长度为0的元素 */
+        for(String key : onRemoveKeys){
+            restApiCacheMap.remove(key);
+            /* 服务被清理了，所以轮询的下标也要清理 */
+            PollingIndexManager.removePolling(key);
+        }
+        System.out.println("接口总数:" + count);
+        return offlineHostList;
+    }
+
+    /**
      * 获取所有API
      * @return
      */
@@ -114,34 +176,31 @@ public class ServerApiCacheManager {
             return (List<RestApiCacheModel>)localApis;
         }
 
-        /* 从内存中获取本项目的MarsApi */
-        Object apiMap = MarsSpace.getEasySpace().getAttr(MarsConstant.CONTROLLER_OBJECTS);
-        if (apiMap == null) {
-            return new ArrayList<>();
-        }
-
         List<RestApiCacheModel> restApiModelList = new ArrayList<>();
 
-        long createTime = System.currentTimeMillis();
+        /* 从内存中获取本项目的MarsApi */
+        Object apiMap = marsSpace.getAttr(MarsConstant.CONTROLLER_OBJECTS);
+        if (apiMap != null) {
+            long createTime = System.currentTimeMillis();
 
-        Map<String, MarsMappingModel> marsApiObjects = (Map<String, MarsMappingModel>) apiMap;
-        for(String methodName : marsApiObjects.keySet()){
-            MarsMappingModel marsMappingModel = marsApiObjects.get(methodName);
-            if(marsMappingModel == null){
-                continue;
+            Map<String, MarsMappingModel> marsApiObjects = (Map<String, MarsMappingModel>) apiMap;
+            for(MarsMappingModel marsMappingModel : marsApiObjects.values()){
+                if(marsMappingModel == null){
+                    continue;
+                }
+                String mName = marsMappingModel.getExeMethod().getName();
+
+                RestApiCacheModel restApiModel = new RestApiCacheModel();
+                restApiModel.setUrl(MarsCloudUtil.getLocalHost() + "/" + mName);
+                restApiModel.setMethodName(mName);
+                restApiModel.setLocalHost(MarsCloudUtil.getLocalHost());
+                restApiModel.setReqMethod(marsMappingModel.getReqMethod());
+                restApiModel.setCreateTime(createTime);
+                restApiModelList.add(restApiModel);
             }
-            String mName = marsMappingModel.getExeMethod().getName();
 
-            RestApiCacheModel restApiModel = new RestApiCacheModel();
-            restApiModel.setUrl(MarsCloudUtil.getLocalHost() + "/" + mName);
-            restApiModel.setMethodName(mName);
-            restApiModel.setLocalHost(MarsCloudUtil.getLocalHost());
-            restApiModel.setReqMethod(marsMappingModel.getReqMethod());
-            restApiModel.setCreateTime(createTime);
-            restApiModelList.add(restApiModel);
+            marsSpace.setAttr(MarsCloudConstant.LOCAL_APIS, restApiModelList);
         }
-
-        marsSpace.setAttr(MarsCloudConstant.LOCAL_APIS, restApiModelList);
 
         return restApiModelList;
     }
