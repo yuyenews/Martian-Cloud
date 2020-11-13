@@ -61,6 +61,7 @@ public class MartianCloudApi {
      */
     @RequestMethod(ReqMethod.POST)
     public String removeNotified(NotifiedModel notifiedModel){
+        logger.info("收到了下线通知, 把你下掉的服务为:{}", notifiedModel.getServerInfo());
         NotifiedManager.removeNotified(notifiedModel.getServerInfo());
         return MarsCloudConstant.RESULT_SUCCESS;
     }

@@ -126,7 +126,6 @@ public class ServerApiCacheManager {
         Map<String, List<RestApiCacheModel>> restApiCacheMap = ServerApiCacheManager.getCacheApisMap();
 
         Set<String> onRemoveKeys = new HashSet<>();
-        int count = 0;
         for(String key : restApiCacheMap.keySet()){
             List<RestApiCacheModel> restApiCacheModelList = restApiCacheMap.get(key);
             if(restApiCacheModelList == null || restApiCacheModelList.size() < 1){
@@ -152,7 +151,6 @@ public class ServerApiCacheManager {
             if(restApiCacheModelList == null || restApiCacheModelList.size() < 1){
                 onRemoveKeys.add(key);
             }
-            count = count + restApiCacheModelList.size();
             restApiCacheMap.put(key, restApiCacheModelList);
         }
         /* 清理value长度为0的元素 */
@@ -161,7 +159,6 @@ public class ServerApiCacheManager {
             /* 服务被清理了，所以轮询的下标也要清理 */
             PollingIndexManager.removePolling(key);
         }
-        System.out.println("接口总数:" + count);
         return offlineHostList;
     }
 
