@@ -64,6 +64,18 @@ Martian-cloud 是Martian的官方分布式组件，基于传染机制，不再�
 4. 如果三台服务中任意一个宕机了，也没关系，因为他们的接口已经传染开了，所有服务都产生了联系，可以跳过一开始的传染途径，直接进行感染
 5. 宕机的这个服务的接口会从其他的服务上自动消失
 
+## 详细原理介绍
+
+[https://www.bilibili.com/read/cv8314554](https://www.bilibili.com/read/cv8314554)
+
+## 官方文档
+
+[http://mars-framework.com/doc.html?tag=compent](http://mars-framework.com/doc.html?tag=compent)
+
+## 使用示例
+
+[https://github.com/yuyenews/Mars-Cloud-Example](https://github.com/yuyenews/Mars-Cloud-Example)
+
 ## 使用起来也很简单
 
 ### 一、 仅需一个依赖
