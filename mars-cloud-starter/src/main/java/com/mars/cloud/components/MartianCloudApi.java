@@ -43,7 +43,13 @@ public class MartianCloudApi {
                 return MarsCloudConstant.RESULT_SUCCESS;
             }
 
-            logger.info("受到了来自[{}]服务的接口传染,感染接口数量:[{}]", restApiModel.getServerName(), restApiModel.getRestApiCacheModels().size());
+            List<RestApiCacheModel> restApiCacheModelList = restApiModel.getRestApiCacheModels();
+            RestApiCacheModel restApiCacheModel = restApiCacheModelList.get(0);
+            if(restApiCacheModel != null){
+                logger.info("受到了来自[{}:{}]服务的接口传染,感染接口数量:[{}]", restApiModel.getServerName(), restApiCacheModel.getLocalHost(), restApiCacheModelList.size());
+            } else {
+                logger.info("受到了来自[{}]服务的接口传染,感染接口数量:[{}]", restApiModel.getServerName(), restApiCacheModelList.size());
+            }
 
             /* 将收到的接口存入本地缓存 */
             ServerApiCacheManager.addCacheApi(restApiModel, true);

@@ -3,7 +3,6 @@ package com.mars.cloud.core.cache.model;
 import com.mars.common.annotation.enums.ReqMethod;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * rest接口实体类

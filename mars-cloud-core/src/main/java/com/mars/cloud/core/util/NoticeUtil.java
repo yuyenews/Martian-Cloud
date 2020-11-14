@@ -1,10 +1,10 @@
 package com.mars.cloud.core.util;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.constant.HttpStatusConstant;
 import com.mars.cloud.constant.MarsCloudConstant;
-import com.mars.cloud.core.cache.ServerApiCache;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.model.NotifiedModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
@@ -17,6 +17,7 @@ import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,8 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NoticeUtil {
 
     private static Logger marsLogger = LoggerFactory.getLogger(NoticeUtil.class);
-
-    private static ServerApiCache serverApiCache = new ServerApiCache();
 
     /**
      * 获取接口地址
@@ -52,15 +51,50 @@ public class NoticeUtil {
         }
 
         if(StringUtil.isNull(httpResultModel.getFileName())) {
+            /*
+                由于微服务中可能会存在一些跟前端直接交互的聚合服务（小型微服务比较常用这种方案来充当网关），
+                这些服务不能序列化响应，只能响应json，这里是为了兼容这些服务
+            */
             String result = httpResultModel.getJSONString();
             if(!StringUtil.isNull(result)){
-                return JSONObject.parseObject(result, ConcurrentHashMap.class);
+                return jsonToMap(result);
             }
         } else {
+            /* 正常的微服务都是序列化返回，所以这里直接反序列化即可 */
             return SerializableCloudUtil.deSerialization(httpResultModel.getInputStream(), ConcurrentHashMap.class);
         }
 
         return null;
+    }
+
+    /**
+     * 将返回的json字符串转成Map
+     * @param result
+     * @return
+     */
+    private static Map<String, List<RestApiCacheModel>> jsonToMap(String result){
+        if(result == null){
+            return null;
+        }
+        Map<String, List<RestApiCacheModel>> restApiCacheMap = new ConcurrentHashMap<>();
+
+        JSONObject jsonObject = JSON.parseObject(result);
+        for(String key : jsonObject.keySet()){
+            JSONArray item = jsonObject.getJSONArray(key);
+            if(item == null || item.size() < 1){
+                continue;
+            }
+            List<RestApiCacheModel> restApiCacheModelList = new ArrayList<>();
+            for(int i=0;i < item.size(); i++){
+                JSONObject jsonItem = item.getJSONObject(i);
+                if(jsonItem == null){
+                    continue;
+                }
+                restApiCacheModelList.add(jsonItem.toJavaObject(RestApiCacheModel.class));
+            }
+            restApiCacheMap.put(key, restApiCacheModelList);
+        }
+        return restApiCacheMap;
     }
 
     /**
@@ -135,11 +169,16 @@ public class NoticeUtil {
         }
 
         if(StringUtil.isNull(httpResultModel.getFileName())) {
+            /*
+                由于微服务中可能会存在一些跟前端直接交互的聚合服务（小型微服务比较常用这种方案来充当网关），
+                这些服务不能序列化响应，只能响应json，这里是为了兼容这些服务
+            */
             String result = httpResultModel.getJSONString();
             if(!StringUtil.isNull(result) && result.equals(MarsCloudConstant.RESULT_SUCCESS)){
                 return true;
             }
         } else {
+            /* 正常的微服务都是序列化返回，所以这里直接反序列化即可 */
             String result = SerializableCloudUtil.deSerialization(httpResultModel.getInputStream(), String.class);
             if (result.equals(MarsCloudConstant.RESULT_SUCCESS)) {
                 return true;

@@ -6,7 +6,6 @@ import com.mars.cloud.core.cache.ServerApiCacheManager;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.cloud.core.util.NoticeUtil;
-import com.mars.cloud.core.vote.VoteManager;
 import com.mars.cloud.util.MarsCloudConfigUtil;
 import com.mars.common.util.StringUtil;
 import org.slf4j.Logger;
@@ -21,11 +20,6 @@ import java.util.Map;
 public class MartianNotice {
 
     private Logger marsLogger = LoggerFactory.getLogger(MartianNotice.class);
-
-    /**
-     * 本地缓存
-     */
-    private ServerApiCache serverApiCache = new ServerApiCache();
 
     /**
      * 广播接口
@@ -150,7 +144,7 @@ public class MartianNotice {
             }
             return true;
         } catch (Exception e) {
-            marsLogger.warn("拉取接口异常");
+            marsLogger.warn("从[{}]拉取接口异常:{}",getApisUrl, e.getMessage());
             return false;
         }
     }
