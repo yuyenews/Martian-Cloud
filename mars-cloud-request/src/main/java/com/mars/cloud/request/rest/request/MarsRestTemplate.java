@@ -4,7 +4,6 @@ import com.mars.cloud.annotation.enums.ContentType;
 import com.mars.cloud.constant.HttpStatusConstant;
 import com.mars.cloud.core.cache.model.RestApiCacheModel;
 import com.mars.cloud.core.offline.OfflineManager;
-import com.mars.cloud.core.vote.VoteManager;
 import com.mars.cloud.fuse.FuseFactory;
 import com.mars.cloud.model.HttpResultModel;
 import com.mars.cloud.request.balanced.BalancedManager;
