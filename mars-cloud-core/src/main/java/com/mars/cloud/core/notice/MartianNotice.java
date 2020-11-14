@@ -26,8 +26,6 @@ public class MartianNotice {
      */
     public void notice() throws Exception {
         try {
-            marsLogger.info("接口传染中.......");
-
             /* 获取传染渠道 */
             String contagions = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getContagions();
             if(StringUtil.isNull(contagions)){

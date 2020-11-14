@@ -41,7 +41,7 @@ public class Timers {
         try {
             OfflineManager.doOffline();
         } catch (Exception e){
-            logger.error("清理本地过期接口异常，10秒后将重试", e);
+            logger.error("清理本地过期接口异常，200毫秒后将重试", e);
         }
     }
 }
