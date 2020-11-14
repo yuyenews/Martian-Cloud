@@ -96,11 +96,13 @@ public class MartianNotice {
             /* 优先从自己缓存的服务上获取接口 */
             String url = NoticeUtil.getRandomUrl(cacheServerList);
             for (int i = 0; i < cacheServerList.size(); i++) {
-                String getApisUrl = url + "/" + MarsCloudConstant.GET_APIS;
-                boolean isSuccess = getRemoteApis(getApisUrl);
-                if (isSuccess) {
-                    /* 从任意服务器上拉取成功，就停止 */
-                    return;
+                if(!StringUtil.isNull(url)){
+                    String getApisUrl = url + "/" + MarsCloudConstant.GET_APIS;
+                    boolean isSuccess = getRemoteApis(getApisUrl);
+                    if (isSuccess) {
+                        /* 从任意服务器上拉取成功，就停止 */
+                        return;
+                    }
                 }
                 url = NoticeUtil.getRandomUrl(cacheServerList);
             }
@@ -109,11 +111,13 @@ public class MartianNotice {
         /* 如果从自己缓存的服务上没有获取到接口，则从配置的服务商拉取 */
         String contagion = NoticeUtil.getRandomUrl(contagionList);
         for (int i = 0; i < contagionList.length; i++) {
-            String getApisUrl = contagion + "/" + MarsCloudConstant.GET_APIS;
-            boolean isSuccess = getRemoteApis(getApisUrl);
-            if (isSuccess) {
-                /* 从任意服务器上拉取成功，就停止 */
-                return;
+            if(!StringUtil.isNull(contagion)) {
+                String getApisUrl = contagion + "/" + MarsCloudConstant.GET_APIS;
+                boolean isSuccess = getRemoteApis(getApisUrl);
+                if (isSuccess) {
+                    /* 从任意服务器上拉取成功，就停止 */
+                    return;
+                }
             }
             contagion = NoticeUtil.getRandomUrl(contagionList);
         }
@@ -144,7 +148,7 @@ public class MartianNotice {
             }
             return true;
         } catch (Exception e) {
-            marsLogger.warn("从[{}]拉取接口异常:{}",getApisUrl, e.getMessage());
+            marsLogger.warn("从[{}]服务拉取接口异常:{}",getApisUrl.substring(0, getApisUrl.lastIndexOf("/")), e.getMessage());
             return false;
         }
     }
