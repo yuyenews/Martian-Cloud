@@ -1,6 +1,6 @@
 package com.mars.cloud.core.notice.model;
 
-import com.mars.cloud.core.cache.model.RestApiCacheModel;
+import com.mars.cloud.model.RestApiCacheModel;
 
 import java.util.List;
 

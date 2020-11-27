@@ -1,4 +1,4 @@
-package com.mars.cloud.request.balanced;
+package com.mars.cloud.balanced;
 
 import com.mars.cloud.model.RestApiCacheModel;
 

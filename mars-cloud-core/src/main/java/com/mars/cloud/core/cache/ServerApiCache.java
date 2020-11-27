@@ -1,6 +1,6 @@
 package com.mars.cloud.core.cache;
 
-import com.mars.cloud.core.cache.model.RestApiCacheModel;
+import com.mars.cloud.model.RestApiCacheModel;
 import com.mars.common.constant.MarsSpace;
 
 import java.util.*;

@@ -1,7 +1,7 @@
 package com.mars.cloud.core.blanced;
 
 import com.mars.cloud.core.cache.ServerApiCacheManager;
-import com.mars.cloud.core.cache.model.RestApiCacheModel;
+import com.mars.cloud.model.RestApiCacheModel;
 
 import java.util.List;
 import java.util.Map;

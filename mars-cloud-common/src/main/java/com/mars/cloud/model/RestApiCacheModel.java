@@ -1,4 +1,4 @@
-package com.mars.cloud.core.cache.model;
+package com.mars.cloud.model;
 
 import com.mars.common.annotation.enums.ReqMethod;
 

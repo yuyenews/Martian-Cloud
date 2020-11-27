@@ -3,7 +3,7 @@ package com.mars.cloud.core.notice;
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.core.cache.ServerApiCache;
 import com.mars.cloud.core.cache.ServerApiCacheManager;
-import com.mars.cloud.core.cache.model.RestApiCacheModel;
+import com.mars.cloud.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.cloud.core.util.NoticeUtil;
 import com.mars.cloud.util.MarsCloudConfigUtil;

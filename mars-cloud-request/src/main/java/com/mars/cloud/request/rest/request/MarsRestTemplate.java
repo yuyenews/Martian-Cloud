@@ -2,7 +2,7 @@ package com.mars.cloud.request.rest.request;
 
 import com.mars.cloud.annotation.enums.ContentType;
 import com.mars.cloud.constant.HttpStatusConstant;
-import com.mars.cloud.core.cache.model.RestApiCacheModel;
+import com.mars.cloud.model.RestApiCacheModel;
 import com.mars.cloud.core.offline.OfflineManager;
 import com.mars.cloud.fuse.FuseFactory;
 import com.mars.cloud.model.HttpResultModel;

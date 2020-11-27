@@ -16,12 +16,17 @@ public class BalancedFactory {
      * @return
      */
     public static BalancedCalc getBalancedCalc() throws Exception {
-        Strategy strategy = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getStrategy();
-        switch (strategy){
-            case POLLING:
-                return new BalancedCalcPolling();
-            case RANDOM:
-                return new BalancedCalcRandom();
+        Object strategy = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getStrategy();
+        if(strategy instanceof BalancedCalc){
+            return (BalancedCalc)strategy;
+        } else {
+            Strategy sty = (Strategy)strategy;
+            switch (sty){
+                case POLLING:
+                    return new BalancedCalcPolling();
+                case RANDOM:
+                    return new BalancedCalcRandom();
+            }
         }
         return new BalancedCalcPolling();
     }

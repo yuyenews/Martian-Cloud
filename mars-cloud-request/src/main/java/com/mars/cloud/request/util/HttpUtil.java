@@ -3,7 +3,7 @@ package com.mars.cloud.request.util;
 import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.annotation.enums.ContentType;
 import com.mars.cloud.constant.MarsCloudConstant;
-import com.mars.cloud.core.cache.model.RestApiCacheModel;
+import com.mars.cloud.model.RestApiCacheModel;
 import com.mars.cloud.model.HttpResultModel;
 import com.mars.cloud.request.rest.model.RequestParamModel;
 import com.mars.cloud.request.util.model.MarsHeader;
