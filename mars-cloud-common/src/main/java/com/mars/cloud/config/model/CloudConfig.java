@@ -2,7 +2,6 @@ package com.mars.cloud.config.model;
 
 import com.mars.cloud.balanced.BalancedCalc;
 import com.mars.cloud.config.model.enums.Protocol;
-import com.mars.cloud.config.model.enums.Strategy;
 
 public class CloudConfig {
     /**
@@ -16,7 +15,7 @@ public class CloudConfig {
     /**
      * 负载均衡策略 POLLING 轮询，RANDOM 随机（暂时只支持这两种）
      */
-    private Object strategy = Strategy.POLLING;
+    private BalancedCalc strategy;
     /**
      * 传染渠道，多个地址用英文逗号分割，并在外面加一个双引号
      */
@@ -57,12 +56,8 @@ public class CloudConfig {
         this.timeOut = timeOut;
     }
 
-    public Object getStrategy() {
+    public BalancedCalc getStrategy() {
         return strategy;
-    }
-
-    public void setStrategy(Strategy strategy) {
-        this.strategy = strategy;
     }
 
     public void setStrategy(BalancedCalc strategy) {

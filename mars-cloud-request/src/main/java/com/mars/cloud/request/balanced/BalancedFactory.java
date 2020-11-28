@@ -1,9 +1,8 @@
 package com.mars.cloud.request.balanced;
 
 
-import com.mars.cloud.config.model.enums.Strategy;
+import com.mars.cloud.balanced.BalancedCalc;
 import com.mars.cloud.request.balanced.impl.BalancedCalcPolling;
-import com.mars.cloud.request.balanced.impl.BalancedCalcRandom;
 import com.mars.cloud.util.MarsCloudConfigUtil;
 
 /**
@@ -16,18 +15,11 @@ public class BalancedFactory {
      * @return
      */
     public static BalancedCalc getBalancedCalc() throws Exception {
-        Object strategy = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getStrategy();
-        if(strategy instanceof BalancedCalc){
-            return (BalancedCalc)strategy;
-        } else {
-            Strategy sty = (Strategy)strategy;
-            switch (sty){
-                case POLLING:
-                    return new BalancedCalcPolling();
-                case RANDOM:
-                    return new BalancedCalcRandom();
-            }
+        BalancedCalc strategy = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getStrategy();
+        if(strategy == null){
+            /* 默认轮询 */
+            return new BalancedCalcPolling();
         }
-        return new BalancedCalcPolling();
+        return strategy;
     }
 }
