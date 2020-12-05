@@ -15,7 +15,7 @@ public class BalancedFactory {
      * @return
      */
     public static BalancedCalc getBalancedCalc() throws Exception {
-        BalancedCalc strategy = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig().getStrategy();
+        BalancedCalc strategy = MarsCloudConfigUtil.getMarsCloudConfig().getBalancedCalc();
         if(strategy == null){
             /* 默认轮询 */
             return new BalancedCalcPolling();
