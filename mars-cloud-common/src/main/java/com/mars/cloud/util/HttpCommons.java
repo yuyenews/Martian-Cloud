@@ -9,6 +9,11 @@ import java.util.concurrent.TimeUnit;
 public class HttpCommons {
 
     /**
+     * okHttpClient
+     */
+    private static OkHttpClient okHttpClient;
+
+    /**
      * 开始请求
      *
      * @param okHttpClient 客户端
@@ -42,11 +47,13 @@ public class HttpCommons {
      * @throws Exception 异常
      */
     public static OkHttpClient getOkHttpClient() throws Exception {
-        long timeOut = getTimeOut();
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(timeOut, TimeUnit.MILLISECONDS)
-                .readTimeout(timeOut, TimeUnit.MILLISECONDS)
-                .build();
+        if(okHttpClient == null){
+            long timeOut = getTimeOut();
+            okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(timeOut, TimeUnit.MILLISECONDS)
+                    .readTimeout(timeOut, TimeUnit.MILLISECONDS)
+                    .build();
+        }
         return okHttpClient;
     }
 

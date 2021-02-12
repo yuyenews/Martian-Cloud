@@ -68,40 +68,38 @@ public class ParamConversionUtil {
 
         Map<String, RequestParamModel> requestParamModelList = new HashMap<>();
         for(Object param : params) {
-            Class cls = param.getClass();
-            Field[] fields = cls.getDeclaredFields();
-
-            for (Object par : params) {
-                if(param instanceof Map){
-                    /* 如果对象是个map就直接强转然后处理 */
-                    Map map = (Map) param;
-                    for(Object key : map.keySet()){
-                        Object value = map.get(key);
-                        if(value == null){
-                            continue;
-                        }
-
-                        RequestParamModel requestParamModel = getRequestParamModel(key.toString(), value);
-                        if (requestParamModel == null) {
-                            continue;
-                        }
-                        requestParamModelList.put(key.toString(), requestParamModel);
+            if(param instanceof Map){
+                /* 如果对象是个map就直接强转然后处理 */
+                Map map = (Map) param;
+                for(Object key : map.keySet()){
+                    Object value = map.get(key);
+                    if(value == null){
+                        continue;
                     }
-                } else {
-                    // 否则就用反射处理
-                    for (Field field : fields) {
-                        field.setAccessible(true);
 
-                        if (Modifier.isFinal(field.getModifiers())) {
-                            continue;
-                        }
-
-                        RequestParamModel requestParamModel = getRequestParamModel(par, field);
-                        if (requestParamModel == null) {
-                            continue;
-                        }
-                        requestParamModelList.put(field.getName(), requestParamModel);
+                    RequestParamModel requestParamModel = getRequestParamModel(key.toString(), value);
+                    if (requestParamModel == null) {
+                        continue;
                     }
+                    requestParamModelList.put(key.toString(), requestParamModel);
+                }
+            } else {
+                // 否则就用反射处理
+                Class cls = param.getClass();
+                Field[] fields = cls.getDeclaredFields();
+
+                for (Field field : fields) {
+                    field.setAccessible(true);
+
+                    if (Modifier.isFinal(field.getModifiers())) {
+                        continue;
+                    }
+
+                    RequestParamModel requestParamModel = getRequestParamModel(param, field);
+                    if (requestParamModel == null) {
+                        continue;
+                    }
+                    requestParamModelList.put(field.getName(), requestParamModel);
                 }
             }
         }

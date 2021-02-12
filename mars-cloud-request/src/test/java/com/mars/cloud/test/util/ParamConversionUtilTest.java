@@ -1,6 +1,7 @@
 package com.mars.cloud.test.util;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.request.rest.model.RequestParamModel;
 import com.mars.cloud.request.util.ParamConversionUtil;
@@ -88,7 +89,7 @@ public class ParamConversionUtilTest {
             Assert.assertEquals(testParamModelC.getAge3(), requestParamModelMap.get("age3").getValue());
 
             for(RequestParamModel requestParamModel : requestParamModelMap.values()){
-                System.out.println(requestParamModel);
+                System.out.println(JSON.toJSONString(requestParamModel));
             }
 
         } catch (Exception e){
