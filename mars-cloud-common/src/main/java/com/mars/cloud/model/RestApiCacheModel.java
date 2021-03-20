@@ -24,7 +24,7 @@ public class RestApiCacheModel implements Serializable {
     /**
      * 请求方式
      */
-    private ReqMethod reqMethod;
+    private ReqMethod[] reqMethod;
 
     /**
      * 方法名称
@@ -52,11 +52,11 @@ public class RestApiCacheModel implements Serializable {
         this.localHost = localHost;
     }
 
-    public ReqMethod getReqMethod() {
+    public ReqMethod[] getReqMethod() {
         return reqMethod;
     }
 
-    public void setReqMethod(ReqMethod reqMethod) {
+    public void setReqMethod(ReqMethod[] reqMethod) {
         this.reqMethod = reqMethod;
     }
 

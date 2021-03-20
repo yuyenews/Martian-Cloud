@@ -1,13 +1,12 @@
 package com.mars.cloud.test.util;
 
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.request.rest.model.RequestParamModel;
 import com.mars.cloud.request.util.ParamConversionUtil;
 import com.mars.cloud.test.util.model.TestParamModelA;
 import com.mars.cloud.test.util.model.TestParamModelB;
 import com.mars.cloud.test.util.model.TestParamModelC;
+import com.mars.common.util.JSONUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,19 +36,19 @@ public class ParamConversionUtilTest {
 
             Object[] objects = new Object[]{testParamModelA, testParamModelB, map};
 
-            JSONObject jsonObject = ParamConversionUtil.conversionToJson(objects);
+            Map<String, Object> jsonObject = ParamConversionUtil.conversionToJson(objects);
 
             Long end = new Date().getTime();
 
             System.out.println("参数转JSON完成，耗时:" + (end - start));
 
-            Assert.assertEquals(testParamModelA.getName(), jsonObject.getString("name"));
-            Assert.assertEquals(testParamModelA.getAge(), jsonObject.getInteger("age"));
+            Assert.assertEquals(testParamModelA.getName(), jsonObject.get("name"));
+            Assert.assertEquals(testParamModelA.getAge(), jsonObject.get("age"));
 
-            Assert.assertEquals(testParamModelB.getName2(), jsonObject.getString("name2"));
-            Assert.assertEquals(testParamModelB.getAge2(), jsonObject.getInteger("age2"));
+            Assert.assertEquals(testParamModelB.getName2(), jsonObject.get("name2"));
+            Assert.assertEquals(testParamModelB.getAge2(), jsonObject.get("age2"));
 
-            System.out.println(jsonObject.toJSONString());
+            System.out.println(JSONUtil.toJSONString(jsonObject));
         } catch (Exception e){
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -89,7 +88,7 @@ public class ParamConversionUtilTest {
             Assert.assertEquals(testParamModelC.getAge3(), requestParamModelMap.get("age3").getValue());
 
             for(RequestParamModel requestParamModel : requestParamModelMap.values()){
-                System.out.println(JSON.toJSONString(requestParamModel));
+                System.out.println(JSONUtil.toJSONString(requestParamModel));
             }
 
         } catch (Exception e){

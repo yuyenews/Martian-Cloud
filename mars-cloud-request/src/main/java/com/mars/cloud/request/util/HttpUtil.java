@@ -1,6 +1,5 @@
 package com.mars.cloud.request.util;
 
-import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.annotation.enums.ContentType;
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.model.RestApiCacheModel;
@@ -10,6 +9,7 @@ import com.mars.cloud.request.util.model.MarsHeader;
 import com.mars.cloud.util.HttpCommons;
 import com.mars.common.annotation.enums.ReqMethod;
 import com.mars.common.constant.MarsConstant;
+import com.mars.common.util.JSONUtil;
 import com.mars.common.util.StringUtil;
 import com.mars.server.server.request.model.MarsFileUpLoad;
 import okhttp3.*;
@@ -118,7 +118,7 @@ public class HttpUtil {
     private static HttpResultModel formPost(RestApiCacheModel restApiModel, Object[] params, MarsHeader marsHeader) throws Exception {
         OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
 
-        JSONObject jsonParam = ParamConversionUtil.conversionToJson(params);
+        Map<String, Object> jsonParam = ParamConversionUtil.conversionToJson(params);
 
         FormBody.Builder formBodyBuilder = new FormBody.Builder();
         for (String key : jsonParam.keySet()) {
@@ -158,7 +158,7 @@ public class HttpUtil {
     private static HttpResultModel formGet(RestApiCacheModel restApiModel, Object[] params, MarsHeader marsHeader) throws Exception {
         OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
 
-        JSONObject jsonParam = ParamConversionUtil.conversionToJson(params);
+        Map<String, Object> jsonParam = ParamConversionUtil.conversionToJson(params);
 
         StringBuffer paramStr = new StringBuffer();
 
@@ -218,9 +218,9 @@ public class HttpUtil {
      */
     private static HttpResultModel json(RestApiCacheModel restApiModel, Object[] params, MarsHeader marsHeader) throws Exception {
         String jsonStrParam = "{}";
-        JSONObject jsonParam = ParamConversionUtil.conversionToJson(params);
+        Map<String, Object> jsonParam = ParamConversionUtil.conversionToJson(params);
         if (jsonParam != null) {
-            jsonStrParam = jsonParam.toJSONString();
+            jsonStrParam = JSONUtil.toJSONString(jsonParam);
         }
 
         OkHttpClient okHttpClient = HttpCommons.getOkHttpClient();
@@ -246,22 +246,22 @@ public class HttpUtil {
         Request.Builder builder = new Request.Builder();
 
         builder = setHeaderForRequestBuilder(builder, marsHeader);
-
-        switch (restApiModel.getReqMethod()) {
-            case POST:
-                builder.post(requestBody);
-                break;
-            case PUT:
-                builder.put(requestBody);
-                break;
-            case DELETE:
-                builder.delete(requestBody);
-                break;
-            case GET:
-                builder.get();
-                break;
+        for(ReqMethod reqMethod : restApiModel.getReqMethod()){
+            switch (reqMethod) {
+                case POST:
+                    builder.post(requestBody);
+                    return builder;
+                case PUT:
+                    builder.put(requestBody);
+                    return builder;
+                case DELETE:
+                    builder.delete(requestBody);
+                    return builder;
+                case GET:
+                    builder.get();
+                    return builder;
+            }
         }
-
         return builder;
     }
 

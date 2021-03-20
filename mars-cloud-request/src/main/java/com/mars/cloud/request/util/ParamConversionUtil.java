@@ -1,6 +1,5 @@
 package com.mars.cloud.request.util;
 
-import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.request.rest.model.RequestParamModel;
 import com.mars.cloud.request.util.enums.ValueType;
 import com.mars.common.util.StringUtil;
@@ -22,11 +21,11 @@ public class ParamConversionUtil {
      * 将Object数组转成一个json对象
      * @param params
      */
-    public static JSONObject conversionToJson(Object[] params) throws Exception {
+    public static Map<String, Object> conversionToJson(Object[] params) throws Exception {
         if(params == null){
             return null;
         }
-        JSONObject jsonParam = new JSONObject();
+        Map<String, Object> jsonParam = new HashMap<>();
         for(Object param : params){
             if(param instanceof Map){
                 /* 如果对象是个map就直接强转然后处理 */

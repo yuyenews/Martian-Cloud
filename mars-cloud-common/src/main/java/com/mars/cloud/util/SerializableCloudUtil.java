@@ -1,6 +1,6 @@
 package com.mars.cloud.util;
 
-import com.alibaba.fastjson.JSONObject;
+import com.mars.common.util.JSONUtil;
 import com.mars.common.util.SerializableUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public class SerializableCloudUtil {
         } catch (Exception e) {
             String errorMag = "将二进制流反序列化成源对象出现异常";
             if(object != null){
-                errorMag = errorMag + ",原数据:" + JSONObject.toJSONString(object);
+                errorMag = errorMag + ",原数据:" + JSONUtil.toJSONString(object);
             }
             logger.error(errorMag, e);
             throw new Exception(errorMag, e);

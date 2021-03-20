@@ -1,8 +1,5 @@
 package com.mars.cloud.core.util;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.mars.cloud.constant.HttpStatusConstant;
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.model.RestApiCacheModel;
@@ -12,6 +9,7 @@ import com.mars.cloud.model.HttpResultModel;
 import com.mars.cloud.util.HttpCommons;
 import com.mars.cloud.util.RandomUtil;
 import com.mars.cloud.util.SerializableCloudUtil;
+import com.mars.common.util.JSONUtil;
 import com.mars.common.util.StringUtil;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -78,19 +76,25 @@ public class NoticeUtil {
         }
         Map<String, List<RestApiCacheModel>> restApiCacheMap = new ConcurrentHashMap<>();
 
-        JSONObject jsonObject = JSON.parseObject(result);
+        Map<String, Object> jsonObject = JSONUtil.toMap(result);
         for(String key : jsonObject.keySet()){
-            JSONArray item = jsonObject.getJSONArray(key);
+            Object objVal = jsonObject.get(key);
+            if(objVal == null){
+                continue;
+            }
+
+            List<Object> item = JSONUtil.toJavaObject(objVal, List.class);
             if(item == null || item.size() < 1){
                 continue;
             }
+
             List<RestApiCacheModel> restApiCacheModelList = new ArrayList<>();
             for(int i=0;i < item.size(); i++){
-                JSONObject jsonItem = item.getJSONObject(i);
+                Object jsonItem = item.get(i);
                 if(jsonItem == null){
                     continue;
                 }
-                restApiCacheModelList.add(jsonItem.toJavaObject(RestApiCacheModel.class));
+                restApiCacheModelList.add(JSONUtil.toJavaObject(jsonItem, RestApiCacheModel.class));
             }
             restApiCacheMap.put(key, restApiCacheModelList);
         }
@@ -109,7 +113,7 @@ public class NoticeUtil {
         try {
             String jsonStrParam = "{}";
             if (restApiModel != null) {
-                jsonStrParam = JSON.toJSONString(restApiModel);
+                jsonStrParam = JSONUtil.toJSONString(restApiModel);
             }
             return doNotice(url, jsonStrParam);
         } catch (Exception e) {
@@ -128,7 +132,7 @@ public class NoticeUtil {
         try {
             String jsonStrParam = "{}";
             if (notifiedModel != null) {
-                jsonStrParam = JSON.toJSONString(notifiedModel);
+                jsonStrParam = JSONUtil.toJSONString(notifiedModel);
             }
             return doNotice(url, jsonStrParam);
         } catch (Exception e) {

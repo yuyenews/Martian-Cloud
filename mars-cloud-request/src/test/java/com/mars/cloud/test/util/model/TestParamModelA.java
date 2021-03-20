@@ -1,6 +1,6 @@
 package com.mars.cloud.test.util.model;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
@@ -12,7 +12,7 @@ public class TestParamModelA {
 
 //    private TestParamModelC testParamModelC = new TestParamModelC();
 
-    @JSONField(format = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date date = new Date();
 
     public String getName() {
