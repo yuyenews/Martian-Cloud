@@ -33,7 +33,7 @@ public class Timers {
     }
 
     /**
-     * 200清理一次过期的接口
+     * 200毫秒清理一次过期的接口
      */
     @MarsTimer(loop = 200)
     public void offline(){
