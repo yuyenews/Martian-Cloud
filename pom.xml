@@ -7,7 +7,7 @@
     <groupId>com.github.yuyenews</groupId>
     <artifactId>Martian-Cloud</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.7</version>
+    <version>4.0.8</version>
     <modules>
         <module>mars-cloud-core</module>
         <module>mars-cloud-request</module>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.github.yuyenews</groupId>
             <artifactId>mars-starter</artifactId>
-            <version>3.2.18</version>
+            <version>3.3.3</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -74,14 +74,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>

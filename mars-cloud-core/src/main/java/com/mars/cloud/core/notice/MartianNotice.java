@@ -67,19 +67,11 @@ public class MartianNotice {
         restApiModel.setRestApiCacheModels(restApiModelList);
 
         for(String contagionUrl : contagionList){
-            /* 如果此服务被通知过了，则跳过 */
-            if(NotifiedManager.isNotified(contagionUrl)){
-                continue;
-            }
-
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append(contagionUrl);
             stringBuffer.append("/");
             stringBuffer.append(MarsCloudConstant.ADD_APIS);
             NoticeUtil.addApis(stringBuffer.toString(), restApiModel);
-
-            /* 记录此服务已经被通知过了 */
-            NotifiedManager.addNotified(contagionUrl);
         }
     }
 
@@ -142,7 +134,7 @@ public class MartianNotice {
                 RestApiModel restApiModel = new RestApiModel();
                 restApiModel.setServerName(ServerApiCache.getServerNameFormKey(entry.getKey()));
                 restApiModel.setRestApiCacheModels(restApiCacheModels);
-                ServerApiCacheManager.addCacheApi(restApiModel, false);
+                ServerApiCacheManager.addCacheApi(restApiModel);
             }
             return true;
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.mars.cloud.components;
 
+import com.mars.aio.par.factory.ParamAndResultFactory;
 import com.mars.cloud.core.cache.ServerApiCacheManager;
 import com.mars.cloud.core.notice.MartianNotice;
 import com.mars.cloud.request.feign.load.LoadMarsFeign;
@@ -7,7 +8,6 @@ import com.mars.cloud.request.util.MarsCloudParamAndResult;
 import com.mars.cloud.util.MarsCloudConfigUtil;
 import com.mars.common.annotation.bean.MarsOnLoad;
 import com.mars.common.base.BaseOnLoad;
-import com.mars.iserver.par.factory.ParamAndResultFactory;
 
 /**
  * 启动时事件

@@ -1,9 +1,9 @@
 package com.mars.cloud.request.util;
 
+import com.mars.aio.par.base.BaseParamAndResult;
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.common.constant.MarsConstant;
 import com.mars.common.util.SerializableUtil;
-import com.mars.iserver.par.base.BaseParamAndResult;
 import com.mars.server.server.request.HttpMarsRequest;
 import com.mars.server.server.request.HttpMarsResponse;
 
@@ -27,7 +27,7 @@ public class MarsCloudParamAndResult implements BaseParamAndResult {
     @Override
     public Object[] getParam(Method method, HttpMarsRequest request, HttpMarsResponse response) throws Exception {
         try {
-            return ParamAndResultFactory.getParamAndResult().getParam(method,request,response);
+            return MarsCloudParamAndResultFactory.getParamAndResult().getParam(method,request,response);
         } catch (Exception e){
             throw new Exception("参数注入异常",e);
         }

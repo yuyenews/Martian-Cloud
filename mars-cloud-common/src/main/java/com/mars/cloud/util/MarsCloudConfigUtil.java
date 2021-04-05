@@ -38,17 +38,4 @@ public class MarsCloudConfigUtil {
             throw new Exception("获取cloud配置中的服务name失败", e);
         }
     }
-
-    /**
-     * 获取下线票数
-     * @return
-     * @throws Exception
-     */
-    public static int getMaxVoteNum() {
-        try {
-            return getMarsCloudConfig().getCloudConfig().getOfflineVote();
-        } catch (Exception e){
-            return 5;
-        }
-    }
 }

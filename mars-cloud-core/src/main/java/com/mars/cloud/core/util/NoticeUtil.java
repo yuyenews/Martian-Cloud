@@ -3,7 +3,6 @@ package com.mars.cloud.core.util;
 import com.mars.cloud.constant.HttpStatusConstant;
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.model.RestApiCacheModel;
-import com.mars.cloud.core.notice.model.NotifiedModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.cloud.model.HttpResultModel;
 import com.mars.cloud.util.HttpCommons;
@@ -118,24 +117,6 @@ public class NoticeUtil {
             return doNotice(url, jsonStrParam);
         } catch (Exception e) {
             marsLogger.warn("发送广播异常");
-            return false;
-        }
-    }
-
-    /**
-     * 通知被下线的服务，让他把我从已广播列表移除，防止误判
-     * @param url
-     * @param notifiedModel
-     * @return
-     */
-    public static boolean removeNotified(String url, NotifiedModel notifiedModel) {
-        try {
-            String jsonStrParam = "{}";
-            if (notifiedModel != null) {
-                jsonStrParam = JSONUtil.toJSONString(notifiedModel);
-            }
-            return doNotice(url, jsonStrParam);
-        } catch (Exception e) {
             return false;
         }
     }

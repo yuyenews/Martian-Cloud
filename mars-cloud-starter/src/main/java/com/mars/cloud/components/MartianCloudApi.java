@@ -3,8 +3,6 @@ package com.mars.cloud.components;
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.core.cache.ServerApiCacheManager;
 import com.mars.cloud.model.RestApiCacheModel;
-import com.mars.cloud.core.notice.NotifiedManager;
-import com.mars.cloud.core.notice.model.NotifiedModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.common.annotation.api.MarsApi;
 import com.mars.common.annotation.api.RequestMethod;
@@ -52,23 +50,11 @@ public class MartianCloudApi {
             }
 
             /* 将收到的接口存入本地缓存 */
-            ServerApiCacheManager.addCacheApi(restApiModel, true);
+            ServerApiCacheManager.addCacheApi(restApiModel);
 
             return MarsCloudConstant.RESULT_SUCCESS;
         } catch (Exception e){
             return MarsCloudConstant.RESULT_ERROR;
         }
-    }
-
-    /**
-     * 移除已经被通知过的服务，
-     * 在某个服务将此服务下线后，为了防止是误判，所以要给此服务发个通知告诉他
-     * @return
-     */
-    @RequestMethod(ReqMethod.POST)
-    public String removeNotified(NotifiedModel notifiedModel){
-        logger.info("收到了下线通知, 把你下掉的服务为:{}", notifiedModel.getServerInfo());
-        NotifiedManager.removeNotified(notifiedModel.getServerInfo());
-        return MarsCloudConstant.RESULT_SUCCESS;
     }
 }

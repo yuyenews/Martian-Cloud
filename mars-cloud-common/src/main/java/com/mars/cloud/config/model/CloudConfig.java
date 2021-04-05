@@ -26,9 +26,9 @@ public class CloudConfig {
     private String ip;
 
     /**
-     * 下线票数
+     * 接口缓存超时时间
      */
-    private int offlineVote = 5;
+    private int apiCacheTimeout = 5000;
 
     /**
      * 是否作为一个网关
@@ -75,12 +75,15 @@ public class CloudConfig {
         this.ip = ip;
     }
 
-    public int getOfflineVote() {
-        return offlineVote;
+    public int getApiCacheTimeout() {
+        return apiCacheTimeout;
     }
 
-    public void setOfflineVote(int offlineVote) {
-        this.offlineVote = offlineVote;
+    public void setApiCacheTimeout(int apiCacheTimeout) {
+        if(apiCacheTimeout < 5000){
+            apiCacheTimeout = 5000;
+        }
+        this.apiCacheTimeout = apiCacheTimeout;
     }
 
     public boolean isGateWay() {

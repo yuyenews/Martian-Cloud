@@ -1,11 +1,10 @@
 package com.mars.cloud.core.cache;
 
+import com.mars.cloud.config.model.CloudConfig;
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.core.blanced.PollingIndexManager;
 import com.mars.cloud.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
-import com.mars.cloud.core.offline.OfflineManager;
-import com.mars.cloud.core.vote.VoteManager;
 import com.mars.cloud.util.MarsCloudConfigUtil;
 import com.mars.cloud.util.MarsCloudUtil;
 import com.mars.common.constant.MarsConstant;
@@ -36,29 +35,13 @@ public class ServerApiCacheManager {
      * 保存接口到本地缓存
      *
      * @param restApiModel
-     * @param isNotice
      */
-    public static void addCacheApi(RestApiModel restApiModel, boolean isNotice) throws Exception {
+    public static void addCacheApi(RestApiModel restApiModel) throws Exception {
         /* 保存接口至本地缓存 */
         for (RestApiCacheModel restApiCacheModel : restApiModel.getRestApiCacheModels()) {
-
-            boolean isDisable = OfflineManager.isDisable(restApiCacheModel.getLocalHost());
-            if (isDisable) {
-                long oldCreateTime = OfflineManager.getDisableTime(restApiCacheModel.getLocalHost());
-                if (isNotice) {
-                    /* 如果此接口是服务主动广播过来的，则说明他活着，那就将下线标识移除 */
-                    OfflineManager.removeDisable(restApiCacheModel.getLocalHost());
-                } else if (oldCreateTime >= restApiCacheModel.getCreateTime()) {
-                    /* 如果此服务不是主动广播过来的，而是我拉取过来的，那就要判断他的创建时间是否大于被我下线时的时间 */
-                    continue;
-                }
-            }
-
+            restApiCacheModel.setCreateTime(new Date().getTime());
             serverApiCache.addCache(restApiModel.getServerName(), restApiCacheModel.getMethodName(), restApiCacheModel);
         }
-
-        /* 重新初始化本地的投票列表 */
-        VoteManager.loadVote();
 
         /* 初始化轮询下标 */
         PollingIndexManager.initPollingMap();
@@ -126,8 +109,9 @@ public class ServerApiCacheManager {
      *
      * @return
      */
-    public static Set<String> getOfflineHost() {
-        Set<String> offlineHostList = new HashSet<>();
+    public static void doOffline() throws Exception {
+
+        long apiCacheTimeout = getTimeOut();
 
         Map<String, List<RestApiCacheModel>> restApiCacheMap = ServerApiCacheManager.getCacheApisMap();
 
@@ -142,9 +126,9 @@ public class ServerApiCacheManager {
 
             /* 寻找已经下线的服务接口 */
             for (RestApiCacheModel restApiCacheModel : restApiCacheModelList) {
-                if (OfflineManager.isDisable(restApiCacheModel.getLocalHost())) {
+                if ((System.currentTimeMillis() - restApiCacheModel.getCreateTime()) > apiCacheTimeout &&
+                    !restApiCacheModel.getLocalHost().equals(MarsCloudUtil.getLocalHost())) {
                     removeObj.add(restApiCacheModel);
-                    offlineHostList.add(restApiCacheModel.getLocalHost());
                 }
             }
 
@@ -165,7 +149,6 @@ public class ServerApiCacheManager {
             /* 服务被清理了，所以轮询的下标也要清理 */
             PollingIndexManager.removePolling(key);
         }
-        return offlineHostList;
     }
 
     /**
@@ -213,5 +196,22 @@ public class ServerApiCacheManager {
         }
 
         return restApiModelList;
+    }
+
+    /**
+     * 获取缓存失效时间
+     * @return
+     */
+    private static long getTimeOut(){
+        try {
+            CloudConfig cloudConfig = MarsCloudConfigUtil.getMarsCloudConfig().getCloudConfig();
+            if(cloudConfig != null && cloudConfig.getApiCacheTimeout() > 0){
+                return cloudConfig.getApiCacheTimeout();
+            }
+
+            return 3000;
+        } catch (Exception e){
+            return 3000;
+        }
     }
 }
