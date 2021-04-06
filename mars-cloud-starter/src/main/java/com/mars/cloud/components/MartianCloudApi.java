@@ -2,6 +2,7 @@ package com.mars.cloud.components;
 
 import com.mars.cloud.constant.MarsCloudConstant;
 import com.mars.cloud.core.cache.ServerApiCacheManager;
+import com.mars.cloud.core.cache.ServerApiExistManager;
 import com.mars.cloud.model.RestApiCacheModel;
 import com.mars.cloud.core.notice.model.RestApiModel;
 import com.mars.common.annotation.api.MarsApi;
@@ -37,16 +38,19 @@ public class MartianCloudApi {
     @RequestMethod(ReqMethod.POST)
     public String addApis(RestApiModel restApiModel){
         try {
-            if(restApiModel == null || restApiModel.getRestApiCacheModels() == null){
+            if(restApiModel == null){
                 return MarsCloudConstant.RESULT_SUCCESS;
             }
 
             List<RestApiCacheModel> restApiCacheModelList = restApiModel.getRestApiCacheModels();
+            if(restApiCacheModelList == null){
+                return MarsCloudConstant.RESULT_SUCCESS;
+            }
+
             RestApiCacheModel restApiCacheModel = restApiCacheModelList.get(0);
-            if(restApiCacheModel != null){
-                logger.info("受到了来自[{}:{}]服务的接口传染,感染接口数量:[{}]", restApiModel.getServerName(), restApiCacheModel.getLocalHost(), restApiCacheModelList.size());
-            } else {
-                logger.info("受到了来自[{}]服务的接口传染,感染接口数量:[{}]", restApiModel.getServerName(), restApiCacheModelList.size());
+            if(restApiCacheModel != null && !ServerApiExistManager.hasExist(restApiCacheModel.getLocalHost())){
+                logger.info("受到了来自[name:{},url:{}]服务的接口传染,感染接口数量:[{}]", restApiModel.getServerName(), restApiCacheModel.getLocalHost(), restApiCacheModelList.size());
+                ServerApiExistManager.add(restApiCacheModel.getLocalHost());
             }
 
             /* 将收到的接口存入本地缓存 */

@@ -129,6 +129,7 @@ public class ServerApiCacheManager {
                 if ((System.currentTimeMillis() - restApiCacheModel.getCreateTime()) > apiCacheTimeout &&
                     !restApiCacheModel.getLocalHost().equals(MarsCloudUtil.getLocalHost())) {
                     removeObj.add(restApiCacheModel);
+                    ServerApiExistManager.remove(restApiCacheModel.getLocalHost());
                 }
             }
 
@@ -177,8 +178,7 @@ public class ServerApiCacheManager {
                 }
                 String mName = marsMappingModel.getExeMethod().getName();
                 if (mName.equals(MarsCloudConstant.GET_APIS)
-                        || mName.equals(MarsCloudConstant.ADD_APIS)
-                        || mName.equals(MarsCloudConstant.REMOVE_NOTIFIED)) {
+                        || mName.equals(MarsCloudConstant.ADD_APIS)) {
                     /* 过滤掉内置的通知接口 */
                     continue;
                 }

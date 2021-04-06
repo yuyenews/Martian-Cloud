@@ -98,7 +98,7 @@ public class MartianNotice {
             }
         }
 
-        /* 如果从自己缓存的服务上没有获取到接口，则从配置的服务商拉取 */
+        /* 如果从自己缓存的服务上没有获取到接口，则从配置的服务上拉取 */
         String contagion = NoticeUtil.getRandomUrl(contagionList);
         for (int i = 0; i < contagionList.length; i++) {
             if(!StringUtil.isNull(contagion)) {

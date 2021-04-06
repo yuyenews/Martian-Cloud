@@ -16,11 +16,6 @@ public class MarsCloudConstant {
     public static final String ADD_APIS  = "addApis";
 
     /**
-     * 通知已将此服务下线
-     */
-    public static final String REMOVE_NOTIFIED = "removeNotified";
-
-    /**
      * 通知成功的返回值
      */
     public static final String RESULT_SUCCESS = "ok";
