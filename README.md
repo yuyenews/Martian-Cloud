@@ -66,7 +66,7 @@ Martian-cloud 是Martian的官方分布式组件，基于传染机制，不再�
 
 ## 详细原理介绍
 
-[https://www.bilibili.com/read/cv8314554](https://www.bilibili.com/read/cv8314554)
+[https://my.oschina.net/yuyenews/blog/472374](https://my.oschina.net/yuyenews/blog/472374)
 
 ## 官方文档
 
